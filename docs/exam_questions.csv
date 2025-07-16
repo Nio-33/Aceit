@@ -1,0 +1,11 @@
+question,optionA,optionB,optionC,optionD,correct,explanation,subject,topic,difficulty,year
+What is the value of 7 + 5?,10,11,12,13,C,7 + 5 = 12,Mathematics,Arithmetic,easy,2022
+What is the square root of 81?,7,8,9,10,C,√81 = 9,Mathematics,Algebra,easy,2022
+"If x = 3, what is the value of 2x + 4?",8,9,10,11,C,2*3 + 4 = 10,Mathematics,Algebra,easy,2022
+Solve for x: x - 5 = 10,10,15,5,0,B,x = 15,Mathematics,Algebra,medium,2022
+What is the area of a triangle with base 6 cm and height 4 cm?,12 cm²,24 cm²,10 cm²,8 cm²,A,(1/2)*6*4 = 12,Mathematics,Geometry,medium,2022
+What is the LCM of 4 and 6?,8,10,12,14,C,"Multiples of 4: 4,8,12; 6: 6,12 ⇒ LCM = 12",Mathematics,Number Theory,medium,2022
+Simplify: 2(3x + 4),6x + 4,6x + 6,6x + 8,5x + 8,C,Distribute 2 ⇒ 6x + 8,Mathematics,Algebra,medium,2022
+Convert 0.75 to a fraction,1/2,3/5,3/4,2/3,C,0.75 = 75/100 = 3/4,Mathematics,Fractions,easy,2022
+Solve: 2x² = 18,x = 2,x = 3,x = ±3,x = ±4,C,Divide by 2 ⇒ x² = 9 ⇒ x = ±3,Mathematics,Algebra,hard,2022
+"If sin θ = 0.5, what is θ in degrees?",60°,45°,90°,30°,D,sin 30° = 0.5,Mathematics,Trigonometry,hard,2022
