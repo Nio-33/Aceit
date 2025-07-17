@@ -26,6 +26,7 @@ class AuthProvider extends ChangeNotifier {
   AuthStatus _status = AuthStatus.uninitialized;
   UserModel? _user;
   bool _isLoading = false;
+  bool _isInitializing = false;
   
   /// Current authentication status
   AuthStatus get status => _status;
@@ -44,16 +45,22 @@ class AuthProvider extends ChangeNotifier {
   
   /// Constructor - sets up auth state listener
   AuthProvider() {
+    _initializeAuth();
+  }
+  
+  /// Initialize authentication state
+  Future<void> _initializeAuth() async {
     try {
-      // Listen for auth state changes
+      // First initialize from local storage
+      await _initializeUser();
+      
+      // Then listen for auth state changes
       _authService.authStateChanges.listen(_onAuthStateChanged);
     } catch (e) {
       // If Firebase is not initialized, just set status to unauthenticated
       _status = AuthStatus.unauthenticated;
       notifyListeners();
     }
-    // Try to get user from shared preferences
-    _initializeUser();
   }
   
   /// Public method to reload the Firebase user
@@ -63,7 +70,16 @@ class AuthProvider extends ChangeNotifier {
   
   /// Handle Firebase auth state changes
   Future<void> _onAuthStateChanged(User? firebaseUser) async {
+    // Skip if we're still initializing to prevent conflicts
+    if (_isInitializing) {
+      print('AuthProvider._onAuthStateChanged: Skipping auth state change - still initializing');
+      return;
+    }
+    
+    print('AuthProvider._onAuthStateChanged: Processing auth state change - user: ${firebaseUser?.uid ?? 'null'}');
+    
     if (firebaseUser == null) {
+      print('AuthProvider._onAuthStateChanged: User is null, setting to unauthenticated');
       _status = AuthStatus.unauthenticated;
       _user = null;
       notifyListeners();
@@ -79,15 +95,19 @@ class AuthProvider extends ChangeNotifier {
         // Check if email is verified
         if (firebaseUser.emailVerified) {
           _status = AuthStatus.authenticated;
+          print('AuthProvider._onAuthStateChanged: Set status to authenticated');
         } else {
           _status = AuthStatus.emailNotVerified;
+          print('AuthProvider._onAuthStateChanged: Set status to emailNotVerified');
         }
       } else {
         _status = AuthStatus.unauthenticated;
+        print('AuthProvider._onAuthStateChanged: User not found in Firestore, setting to unauthenticated');
       }
     } catch (e, stackTrace) {
       ErrorHandler.logError('AuthProvider._onAuthStateChanged', e, stackTrace);
       _status = AuthStatus.unauthenticated;
+      print('AuthProvider._onAuthStateChanged: Error occurred, setting to unauthenticated: $e');
     }
     
     notifyListeners();
@@ -95,6 +115,7 @@ class AuthProvider extends ChangeNotifier {
   
   /// Initialize user from shared preferences or current Firebase user
   Future<void> _initializeUser() async {
+    _isInitializing = true;
     try {
       // First try to get user from shared preferences
       final prefsUser = await _authService.getUserFromPrefs();
@@ -135,6 +156,8 @@ class AuthProvider extends ChangeNotifier {
     } catch (e, stackTrace) {
       ErrorHandler.logError('AuthProvider._initializeUser', e, stackTrace);
       _status = AuthStatus.unauthenticated;
+    } finally {
+      _isInitializing = false;
     }
     
     notifyListeners();
@@ -261,13 +284,55 @@ class AuthProvider extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
       
-      await _authService.signOut();
+      print('AuthProvider.signOut: Starting logout process');
+      
+      // Immediately set status to unauthenticated to prevent UI blocking
       _status = AuthStatus.unauthenticated;
       _user = null;
-    } finally {
+      _isLoading = false;
+      notifyListeners();
+      
+      print('AuthProvider.signOut: Status set to unauthenticated, UI should update now');
+      
+      // Then clear auth service in background with timeout protection
+      try {
+        await _authService.signOut().timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            print('AuthProvider.signOut: Firebase signOut timeout, but local logout completed');
+          },
+        );
+        print('AuthProvider.signOut: Firebase signOut completed');
+      } catch (e) {
+        print('AuthProvider.signOut: Firebase signOut error: $e, but local logout completed');
+        // Don't rethrow - local logout is already complete
+      }
+      
+    } catch (e, stackTrace) {
+      print('AuthProvider.signOut: Error during logout: $e');
+      ErrorHandler.logError('AuthProvider.signOut', e, stackTrace);
+      // Ensure we're still logged out locally
+      _status = AuthStatus.unauthenticated;
+      _user = null;
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  /// Force logout - immediately sets status to unauthenticated without waiting for Firebase
+  void forceLogout() {
+    print('AuthProvider.forceLogout: Forcing immediate logout');
+    _status = AuthStatus.unauthenticated;
+    _user = null;
+    _isLoading = false;
+    notifyListeners();
+    
+    // Clear auth service in background
+    _authService.signOut().then((_) {
+      print('AuthProvider.forceLogout: Background Firebase signOut completed');
+    }).catchError((e) {
+      print('AuthProvider.forceLogout: Background Firebase signOut error: $e');
+    });
   }
   
   /// Reset password for the given email

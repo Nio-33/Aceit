@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../features/auth/providers/auth_provider.dart';
+import '../features/quiz/providers/quiz_provider.dart';
+import '../features/auth/screens/welcome_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/email_verification_screen.dart';
 import '../features/onboarding/screens/onboarding_screen.dart';
@@ -48,8 +50,11 @@ class _AceItAppState extends State<AceItApp> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
+    print('AceItApp.build: AuthProvider status: ${authProvider.status}, isLoading: ${authProvider.isLoading}');
+    
     // Show loading indicator while checking preferences
     if (_isLoading) {
+      print('AceItApp.build: Showing loading screen (checking preferences)');
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
@@ -59,22 +64,27 @@ class _AceItAppState extends State<AceItApp> {
 
     // Show onboarding if not completed
     if (!_isOnboardingCompleted) {
+      print('AceItApp.build: Showing onboarding screen');
       return const OnboardingScreen();
     }
 
     // Show appropriate screen based on authentication status
     switch (authProvider.status) {
       case AuthStatus.uninitialized:
+        print('AceItApp.build: Showing loading screen (auth uninitialized)');
         return const Scaffold(
           body: Center(
             child: CircularProgressIndicator(),
           ),
         );
       case AuthStatus.unauthenticated:
-        return const LoginScreen();
+        print('AceItApp.build: Showing welcome screen (unauthenticated)');
+        return const WelcomeScreen();
       case AuthStatus.authenticated:
+        print('AceItApp.build: Showing dashboard screen (authenticated)');
         return const DashboardScreen();
       case AuthStatus.emailNotVerified:
+        print('AceItApp.build: Showing email verification screen');
         return const EmailVerificationScreen();
     }
   }
