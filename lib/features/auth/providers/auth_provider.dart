@@ -346,6 +346,7 @@ class AuthProvider extends ChangeNotifier {
   /// Force logout - immediately sets status to unauthenticated without waiting for Firebase
   void forceLogout() {
     print('AuthProvider.forceLogout: Forcing immediate logout');
+    _isLoggingOut = true; // Prevent auth state listener interference
     _status = AuthStatus.unauthenticated;
     _user = null;
     _isLoading = false;
@@ -354,8 +355,10 @@ class AuthProvider extends ChangeNotifier {
     // Clear auth service in background
     _authService.signOut().then((_) {
       print('AuthProvider.forceLogout: Background Firebase signOut completed');
+      _isLoggingOut = false; // Reset the flag
     }).catchError((e) {
       print('AuthProvider.forceLogout: Background Firebase signOut error: $e');
+      _isLoggingOut = false; // Reset the flag even on error
     });
   }
 

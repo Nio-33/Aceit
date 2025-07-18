@@ -277,10 +277,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
 
     try {
       await authProvider.signOut();
-
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, AppConstants.loginRoute);
-      }
+      // Navigation will be handled automatically by AuthProvider state change
+      // No manual navigation needed to prevent conflicts
     } catch (e) {
       if (mounted) {
         ErrorHandler.showErrorDialog(
