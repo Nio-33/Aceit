@@ -1,8 +1,83 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_theme.dart';
+import 'package:provider/provider.dart';
+import 'package:aceit/core/theme/app_theme.dart';
+import 'package:aceit/features/auth/providers/auth_provider.dart';
+import 'package:aceit/features/quiz/screens/quiz_taking_screen.dart';
+import 'package:aceit/widgets/common/primary_button.dart';
 
-class DailyQuizScreen extends StatelessWidget {
+class DailyQuizScreen extends StatefulWidget {
   const DailyQuizScreen({super.key});
+
+  @override
+  State<DailyQuizScreen> createState() => _DailyQuizScreenState();
+}
+
+class _DailyQuizScreenState extends State<DailyQuizScreen> {
+  String _selectedSubject = 'Mathematics';
+  String _selectedExamType = 'WAEC';
+
+  final List<String> _subjects = [
+    'Mathematics',
+    'English Language',
+    'Physics',
+    'Chemistry',
+    'Biology',
+    'Geography',
+    'Economics',
+    'Government',
+    'Literature',
+    'History',
+  ];
+
+  final List<String> _examTypes = ['WAEC', 'JAMB', 'NECO'];
+
+  void _startDailyQuiz(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final user = authProvider.user;
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please login to start quiz')),
+      );
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => QuizTakingScreen(
+          userId: user.id,
+          quizType: 'daily',
+          subject: _selectedSubject,
+          examType: _selectedExamType,
+          durationInMinutes: 15, // 15 minutes for daily quiz
+        ),
+      ),
+    );
+  }
+
+  void _startSubjectQuiz(String subject) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final user = authProvider.user;
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please login to start quiz')),
+      );
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => QuizTakingScreen(
+          userId: user.id,
+          quizType: 'subject_practice',
+          subject: subject,
+          examType: _selectedExamType,
+          durationInMinutes: 20, // 20 minutes for subject quiz
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,30 +120,106 @@ class DailyQuizScreen extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    // Start daily quiz
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 16,
-                    ),
-                  ),
-                  child: const Text(
-                    'Start Quiz',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
+          const SizedBox(height: 24),
+
+          // Subject and Exam Type Selection
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Quiz Settings',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Subject Selection
+                  const Text(
+                    'Select Subject:',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: _selectedSubject,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                    ),
+                    items: _subjects.map((subject) {
+                      return DropdownMenuItem<String>(
+                        value: subject,
+                        child: Text(subject),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedSubject = value!;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Exam Type Selection
+                  const Text(
+                    'Select Exam Type:',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: _selectedExamType,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                    ),
+                    items: _examTypes.map((examType) {
+                      return DropdownMenuItem<String>(
+                        value: examType,
+                        child: Text(examType),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedExamType = value!;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Start Quiz Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: PrimaryButton(
+                      text: 'Start Daily Quiz',
+                      onPressed: () => _startDailyQuiz(context),
+                      icon: Icons.play_arrow,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 32),
-          
+
           // Quiz History
           const Text(
             'Your Recent Quizzes',
@@ -78,12 +229,12 @@ class DailyQuizScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           ...List.generate(5, (index) {
             final date = DateTime.now().subtract(Duration(days: index));
             final score = 7 + (index % 4); // Random score between 7-10
             final formattedDate = '${date.day}/${date.month}/${date.year}';
-            
+
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
               child: ListTile(
@@ -110,7 +261,7 @@ class DailyQuizScreen extends StatelessWidget {
             );
           }),
           const SizedBox(height: 32),
-          
+
           // Subject Quizzes
           const Text(
             'Subject Quizzes',
@@ -120,7 +271,7 @@ class DailyQuizScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           GridView.count(
             crossAxisCount: 2,
             crossAxisSpacing: 16,
@@ -138,11 +289,12 @@ class DailyQuizScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildSubjectQuizCard(String subject, Color color) {
     return InkWell(
       onTap: () {
         // Navigate to subject quiz
+        _startSubjectQuiz(subject);
       },
       borderRadius: BorderRadius.circular(12),
       child: Card(
@@ -196,4 +348,4 @@ class DailyQuizScreen extends StatelessWidget {
       ),
     );
   }
-} 
+}

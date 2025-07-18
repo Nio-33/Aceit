@@ -13,7 +13,8 @@ class OnboardingScreen extends StatefulWidget {
   State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> with TickerProviderStateMixin {
+class _OnboardingScreenState extends State<OnboardingScreen>
+    with TickerProviderStateMixin {
   final PageController _pageController = PageController();
   late AnimationController _lottieController;
   int _currentPage = 0;
@@ -23,25 +24,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
   final List<OnboardingPage> _pages = [
     OnboardingPage(
       title: 'Welcome to AceIt',
-      description: 'Your personalized learning companion for Nigerian national exams. Prepare effectively for WAEC, JAMB, and NECO with our comprehensive study tools.',
+      description:
+          'Your personalized learning companion for Nigerian national exams. Prepare effectively for WAEC, JAMB, and NECO with our comprehensive study tools.',
       lottieAsset: 'assets/animations/study.json',
       color: AppTheme.primaryColor,
     ),
     OnboardingPage(
       title: 'Practice Makes Perfect',
-      description: 'Take realistic mock exams, daily quizzes, and use flashcards to reinforce key concepts. Our questions are carefully curated to match real exam patterns.',
+      description:
+          'Take realistic mock exams, daily quizzes, and use flashcards to reinforce key concepts. Our questions are carefully curated to match real exam patterns.',
       lottieAsset: 'assets/animations/practice.json',
       color: const Color(0xFF4CAF50),
     ),
     OnboardingPage(
       title: 'Track Your Progress',
-      description: 'Monitor your improvement over time with detailed analytics. Identify your strengths and weaknesses to focus your studies more effectively.',
+      description:
+          'Monitor your improvement over time with detailed analytics. Identify your strengths and weaknesses to focus your studies more effectively.',
       lottieAsset: 'assets/animations/progress.json',
       color: const Color(0xFFFF9800),
     ),
     OnboardingPage(
       title: 'Compete & Collaborate',
-      description: 'Join the leaderboard, compete with friends, and earn achievements. Stay motivated with daily streaks and rewards for consistent studying.',
+      description:
+          'Join the leaderboard, compete with friends, and earn achievements. Stay motivated with daily streaks and rewards for consistent studying.',
       lottieAsset: 'assets/animations/progress.json',
       color: const Color(0xFF9C27B0),
     ),
@@ -51,7 +56,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
   void initState() {
     super.initState();
     debugPrint('OnboardingScreen: initState called');
-    
+
     try {
       _lottieController = AnimationController(
         vsync: this,
@@ -59,7 +64,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
       );
       _lottieController.forward();
       debugPrint('OnboardingScreen: Lottie controller initialized');
-      
+
       // Set loading to false after a short delay
       Future.delayed(const Duration(milliseconds: 100), () {
         if (mounted) {
@@ -92,7 +97,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
   @override
   Widget build(BuildContext context) {
     debugPrint('OnboardingScreen: build called');
-    
+
     if (_errorMessage != null) {
       return Scaffold(
         body: Center(
@@ -105,16 +110,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pushReplacementNamed(AppConstants.loginRoute);
+                  Navigator.of(context)
+                      .pushReplacementNamed(AppConstants.registerRoute);
                 },
-                child: const Text('Go to Login'),
+                child: const Text('Go to Register'),
               ),
             ],
           ),
         ),
       );
     }
-    
+
     if (_isLoading) {
       return const Scaffold(
         body: Center(
@@ -122,10 +128,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         ),
       );
     }
-    
+
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     return Scaffold(
       body: Stack(
         children: [
@@ -171,7 +177,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
               ],
             ),
           ),
-          
+
           // Page content
           PageView.builder(
             controller: _pageController,
@@ -188,7 +194,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
               return _buildPage(_pages[index]);
             },
           ),
-          
+
           // Skip button
           Positioned(
             top: MediaQuery.of(context).padding.top + 16,
@@ -200,7 +206,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               ),
               child: const Text(
                 'Skip',
@@ -211,7 +218,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
               ),
             ),
           ),
-          
+
           // Bottom navigation
           Positioned(
             bottom: 0,
@@ -230,7 +237,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Navigation buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -251,10 +258,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                               ),
                             )
                           : const SizedBox(width: 48),
-                      
+
                       // Next/Done button
                       PrimaryButton(
-                        text: _currentPage == _pages.length - 1 ? 'Get Started' : 'Next',
+                        text: _currentPage == _pages.length - 1
+                            ? 'Get Started'
+                            : 'Next',
                         onPressed: () {
                           if (_currentPage == _pages.length - 1) {
                             _completeOnboarding();
@@ -269,7 +278,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                         backgroundColor: Colors.white,
                         textColor: _pages[_currentPage].color,
                       ),
-                      
+
                       // Placeholder for symmetry
                       const SizedBox(width: 48),
                     ],
@@ -282,7 +291,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
       ),
     );
   }
-  
+
   Widget _buildPage(OnboardingPage page) {
     return SafeArea(
       child: Padding(
@@ -291,15 +300,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(height: 48),
-            
+
             // Animation
             SizedBox(
               height: 240,
               child: FutureBuilder(
                 future: _loadLottieAsset(page.lottieAsset),
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done && 
-                      snapshot.hasData && 
+                  if (snapshot.connectionState == ConnectionState.done &&
+                      snapshot.hasData &&
                       snapshot.data == true) {
                     try {
                       return Lottie.asset(
@@ -324,7 +333,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
               ),
             ),
             const SizedBox(height: 48),
-            
+
             // Title
             Text(
               page.title,
@@ -336,7 +345,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            
+
             // Description
             Text(
               page.description,
@@ -352,7 +361,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
       ),
     );
   }
-  
+
   Widget _buildPlaceholderIcon(OnboardingPage page) {
     return Container(
       width: 240,
@@ -370,7 +379,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
       ),
     );
   }
-  
+
   Widget _buildIndicator(bool isActive) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
@@ -383,7 +392,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
       ),
     );
   }
-  
+
   IconData _getIconForPage(OnboardingPage page) {
     final index = _pages.indexOf(page);
     switch (index) {
@@ -399,7 +408,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         return Icons.star;
     }
   }
-  
+
   Future<bool> _loadLottieAsset(String asset) async {
     try {
       debugPrint('OnboardingScreen: Loading Lottie asset: $asset');
@@ -410,7 +419,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
       return false;
     }
   }
-  
+
   void _completeOnboarding() async {
     debugPrint('OnboardingScreen: Completing onboarding');
     try {
@@ -418,15 +427,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(AppConstants.onboardingCompletedKey, true);
       debugPrint('OnboardingScreen: Onboarding completed saved');
-      
-      // Navigate to login screen
+
+      // Navigate to register screen for new users
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed(AppConstants.loginRoute);
+        Navigator.of(context).pushReplacementNamed(AppConstants.registerRoute);
       }
     } catch (e) {
       debugPrint('OnboardingScreen: Error completing onboarding: $e');
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed(AppConstants.loginRoute);
+        Navigator.of(context).pushReplacementNamed(AppConstants.registerRoute);
       }
     }
   }
@@ -438,11 +447,11 @@ class OnboardingPage {
   final String description;
   final String lottieAsset;
   final Color color;
-  
+
   OnboardingPage({
     required this.title,
     required this.description,
     required this.lottieAsset,
     required this.color,
   });
-} 
+}

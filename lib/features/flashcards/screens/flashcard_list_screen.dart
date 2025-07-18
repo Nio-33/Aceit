@@ -2,15 +2,61 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../providers/flashcard_provider.dart';
+import '../screens/flashcard_study_screen.dart';
+import '../../../widgets/common/primary_button.dart';
 
-class FlashcardListScreen extends StatelessWidget {
+class FlashcardListScreen extends StatefulWidget {
   const FlashcardListScreen({super.key});
+
+  @override
+  State<FlashcardListScreen> createState() => _FlashcardListScreenState();
+}
+
+class _FlashcardListScreenState extends State<FlashcardListScreen> {
+  String? _selectedSubject;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadFlashcardData();
+    });
+  }
+
+  Future<void> _loadFlashcardData() async {
+    final flashcardProvider =
+        Provider.of<FlashcardProvider>(context, listen: false);
+    await flashcardProvider.loadSubjects();
+    await flashcardProvider.loadAllFlashcards();
+  }
+
+  void _startStudySession(String subject) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final user = authProvider.user;
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please login to start studying')),
+      );
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => FlashcardStudyScreen(
+          userId: user.id,
+          subject: subject,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final user = authProvider.user;
-    
+
     if (user == null) {
       return const Scaffold(
         body: Center(
@@ -18,9 +64,7 @@ class FlashcardListScreen extends StatelessWidget {
         ),
       );
     }
-    
-    final subjects = user.selectedSubjects;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Flashcards'),
@@ -33,115 +77,166 @@ class FlashcardListScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Header
-          const Text(
-            'Study with Flashcards',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Flashcards are a great way to memorize key concepts and formulas',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 24),
-          
-          // Recent Sets
-          const Text(
-            'Recent Sets',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          
-          SizedBox(
-            height: 160,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                final colors = [
-                  Colors.blue,
-                  Colors.green,
-                  Colors.orange,
-                  Colors.purple,
-                  Colors.teal,
-                ];
-                final subject = subjects[index % subjects.length];
-                
-                return _buildRecentFlashcardSet(
-                  subject: subject, 
-                  cardCount: (index + 1) * 5,
-                  color: colors[index % colors.length],
-                  context: context,
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 32),
-          
-          // Subjects
-          const Text(
-            'Browse by Subject',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          
-          ...subjects.map((subject) {
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: AppTheme.primaryColor.withOpacity(0.2),
-                  child: Text(
-                    subject[0],
+      body: Consumer<FlashcardProvider>(
+        builder: (context, flashcardProvider, child) {
+          return RefreshIndicator(
+            onRefresh: _loadFlashcardData,
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                // Header
+                const Text(
+                  'Study with Flashcards',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Flashcards are a great way to memorize key concepts and formulas',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Loading state
+                if (flashcardProvider.isLoading) ...[
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                ],
+
+                // Error state
+                if (flashcardProvider.error != null) ...[
+                  Card(
+                    color: Colors.red[50],
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            color: Colors.red[600],
+                            size: 48,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            flashcardProvider.error!,
+                            style: TextStyle(
+                              color: Colors.red[700],
+                              fontSize: 14,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          PrimaryButton(
+                            text: 'Retry',
+                            onPressed: _loadFlashcardData,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+
+                // Subjects
+                if (flashcardProvider.subjects.isNotEmpty) ...[
+                  const Text(
+                    'Study by Subject',
                     style: TextStyle(
-                      color: AppTheme.primaryColor,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-                title: Text(subject),
-                subtitle: Text('${(subject.length * 3)} flashcards'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  // Navigate to subject flashcards
-                },
-              ),
-            );
-          }).toList(),
-          
-          const SizedBox(height: 32),
-          
-          // Create new set button
-          ElevatedButton.icon(
-            onPressed: () {
-              // Create new flashcard set
-            },
-            icon: const Icon(Icons.add),
-            label: const Text('Create New Set'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+                  const SizedBox(height: 16),
+
+                  // Subject cards
+                  ...flashcardProvider.subjects.map((subject) {
+                    final subjectFlashcards = flashcardProvider.allFlashcards
+                        .where((card) => card.subject == subject)
+                        .toList();
+
+                    return _buildSubjectCard(
+                      subject: subject,
+                      cardCount: subjectFlashcards.length,
+                      flashcardProvider: flashcardProvider,
+                    );
+                  }).toList(),
+                ] else if (!flashcardProvider.isLoading &&
+                    flashcardProvider.error == null) ...[
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32.0),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.style_outlined,
+                            size: 64,
+                            color: Colors.grey,
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'No Flashcards Available',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Please seed sample data from the admin panel to get started',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
-  
+
+  Widget _buildSubjectCard({
+    required String subject,
+    required int cardCount,
+    required FlashcardProvider flashcardProvider,
+  }) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: AppTheme.primaryColor.withOpacity(0.2),
+          child: Text(
+            subject[0],
+            style: TextStyle(
+              color: AppTheme.primaryColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        title: Text(subject),
+        subtitle: Text('$cardCount flashcards available'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => _startStudySession(subject),
+      ),
+    );
+  }
+
   Widget _buildRecentFlashcardSet({
     required String subject,
     required int cardCount,
@@ -225,4 +320,4 @@ class FlashcardListScreen extends StatelessWidget {
       ),
     );
   }
-} 
+}

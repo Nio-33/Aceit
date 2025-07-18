@@ -32,12 +32,12 @@ class UserModel {
       name: json['name'] as String,
       email: json['email'] as String,
       department: json['department'] as String,
-      selectedSubjects: (json['selectedSubjects'] is Iterable) 
-          ? List<String>.from(json['selectedSubjects'] as Iterable) 
+      selectedSubjects: (json['selectedSubjects'] is Iterable)
+          ? List<String>.from(json['selectedSubjects'] as Iterable)
           : <String>[],
       currentStreak: json['currentStreak'] as int? ?? 0,
-      lastLoginDate: json['lastLoginDate'] != null 
-          ? (json['lastLoginDate'] as Timestamp).toDate() 
+      lastLoginDate: json['lastLoginDate'] != null
+          ? (json['lastLoginDate'] as Timestamp).toDate()
           : DateTime.now(),
       points: json['points'] as int? ?? 0,
       progress: json['progress'] as Map<String, dynamic>? ?? {},
@@ -87,4 +87,4 @@ class UserModel {
       emailVerified: emailVerified ?? this.emailVerified,
     );
   }
-} 
+}

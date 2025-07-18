@@ -15,7 +15,8 @@ class EmailVerificationScreen extends StatefulWidget {
   const EmailVerificationScreen({super.key});
 
   @override
-  State<EmailVerificationScreen> createState() => _EmailVerificationScreenState();
+  State<EmailVerificationScreen> createState() =>
+      _EmailVerificationScreenState();
 }
 
 class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
@@ -24,7 +25,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   Timer? _timer;
   int _timerSeconds = 0;
   int _pollAttempts = 0;
-  final int _maxPollAttempts = 30; // Check for 5 minutes (30 attempts * 10 seconds)
+  final int _maxPollAttempts =
+      30; // Check for 5 minutes (30 attempts * 10 seconds)
   final int _resendCooldown = 60; // 60 seconds cooldown for resend button
 
   @override
@@ -43,20 +45,20 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   void _startVerificationCheck() {
     // Reset poll attempts
     _pollAttempts = 0;
-    
+
     // Check immediately first time
     _checkEmailVerification();
-    
+
     // Then start polling every 10 seconds
     _timer = Timer.periodic(const Duration(seconds: 10), (timer) async {
       _pollAttempts++;
-      
+
       // Stop checking after max attempts
       if (_pollAttempts >= _maxPollAttempts) {
         timer.cancel();
         return;
       }
-      
+
       await _checkEmailVerification();
     });
   }
@@ -64,28 +66,29 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   /// Check if the user's email has been verified
   Future<void> _checkEmailVerification() async {
     if (!mounted) return;
-    
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+
     if (authProvider.isLoading) return;
-    
+
     setState(() {
       _isVerifying = true;
     });
-    
+
     try {
       // Force user reload before checking verification status
       await authProvider.reloadUser();
-      
+
       // Add a timeout to prevent hanging
-      final isVerified = await authProvider.checkEmailVerified()
-        .timeout(const Duration(seconds: 10), onTimeout: () {
-          print('Email verification check timed out');
-          return false;
-        });
-      
+      final isVerified = await authProvider
+          .checkEmailVerified()
+          .timeout(const Duration(seconds: 10), onTimeout: () {
+        print('Email verification check timed out');
+        return false;
+      });
+
       if (!mounted) return;
-      
+
       if (isVerified) {
         _timer?.cancel();
         // Add a short delay to ensure we're ready to navigate
@@ -101,10 +104,12 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
         }
       } else {
         // Show a message to the user that they need to check their email
-        if (_pollAttempts % 3 == 0 && mounted) { // Show every 3 attempts (30 seconds)
+        if (_pollAttempts % 3 == 0 && mounted) {
+          // Show every 3 attempts (30 seconds)
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Please check your email and click the verification link'),
+              content: Text(
+                  'Please check your email and click the verification link'),
               duration: Duration(seconds: 3),
             ),
           );
@@ -116,8 +121,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
         // Only show dialog for serious errors, not timeouts
         if (e is! TimeoutException) {
           ErrorHandler.showErrorDialog(
-            context, 
-            'Verification Check Failed', 
+            context,
+            'Verification Check Failed',
             e,
           );
         }
@@ -134,15 +139,15 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   /// Force verification manual check with user feedback
   Future<void> _forceVerificationCheck() async {
     if (!mounted) return;
-    
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+
     if (authProvider.isLoading) return;
-    
+
     setState(() {
       _isVerifying = true;
     });
-    
+
     try {
       // Show feedback that we're checking
       ScaffoldMessenger.of(context).showSnackBar(
@@ -151,19 +156,20 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
           duration: Duration(seconds: 2),
         ),
       );
-      
+
       // Force user reload
       await authProvider.reloadUser();
-      
+
       // Add a timeout to prevent hanging
-      final isVerified = await authProvider.checkEmailVerified()
-        .timeout(const Duration(seconds: 10), onTimeout: () {
-          print('Manual email verification check timed out');
-          return false;
-        });
-      
+      final isVerified = await authProvider
+          .checkEmailVerified()
+          .timeout(const Duration(seconds: 10), onTimeout: () {
+        print('Manual email verification check timed out');
+        return false;
+      });
+
       if (!mounted) return;
-      
+
       if (isVerified) {
         _timer?.cancel();
         // Add a short delay to ensure we're ready to navigate
@@ -182,7 +188,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Email not verified yet. Please check your inbox and click the verification link.'),
+              content: Text(
+                  'Email not verified yet. Please check your inbox and click the verification link.'),
               duration: Duration(seconds: 5),
             ),
           );
@@ -192,8 +199,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       print('Error during manual verification check: $e');
       if (mounted) {
         ErrorHandler.showErrorDialog(
-          context, 
-          'Verification Check Failed', 
+          context,
+          'Verification Check Failed',
           e,
         );
       }
@@ -209,23 +216,23 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   /// Resend verification email
   Future<void> _resendVerificationEmail() async {
     if (!mounted) return;
-    
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+
     if (authProvider.isLoading) return;
-    
+
     setState(() {
       _isResending = true;
     });
-    
+
     try {
       await authProvider.sendEmailVerification();
-      
+
       // Start cooldown timer
       setState(() {
         _timerSeconds = _resendCooldown;
       });
-      
+
       // Setup timer for cooldown
       Timer.periodic(const Duration(seconds: 1), (timer) {
         if (_timerSeconds <= 0) {
@@ -236,7 +243,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
           });
         }
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -248,8 +255,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
     } catch (e) {
       if (mounted) {
         ErrorHandler.showErrorDialog(
-          context, 
-          'Email Sending Failed', 
+          context,
+          'Email Sending Failed',
           e,
         );
       }
@@ -265,20 +272,20 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   /// Sign out user
   Future<void> _signOut() async {
     if (!mounted) return;
-    
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+
     try {
       await authProvider.signOut();
-      
+
       if (mounted) {
         Navigator.pushReplacementNamed(context, AppConstants.loginRoute);
       }
     } catch (e) {
       if (mounted) {
         ErrorHandler.showErrorDialog(
-          context, 
-          'Sign Out Failed', 
+          context,
+          'Sign Out Failed',
           e,
         );
       }
@@ -290,7 +297,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
     final authProvider = Provider.of<AuthProvider>(context);
     final user = authProvider.user;
     final email = user?.email ?? 'your email';
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Email Verification'),
@@ -350,7 +357,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const DepartmentSelectionScreen(),
+                              builder: (context) =>
+                                  const DepartmentSelectionScreen(),
                             ),
                           );
                         },
@@ -364,15 +372,16 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                     ],
                   ),
                 ),
-                
+
               // Email Verification Animation/Image
               SizedBox(
                 height: 200,
                 child: FutureBuilder(
-                  future: _lottieExists('assets/animations/email_verification.json'),
+                  future: _lottieExists(
+                      'assets/animations/email_verification.json'),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done && 
-                        snapshot.hasData && 
+                    if (snapshot.connectionState == ConnectionState.done &&
+                        snapshot.hasData &&
                         snapshot.data == true) {
                       return Lottie.asset(
                         'assets/animations/email_verification.json',
@@ -397,17 +406,17 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              
+
               // Title
               Text(
                 'Verify Your Email',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryColor,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryColor,
+                    ),
               ),
               const SizedBox(height: 16),
-              
+
               // Instructions
               Text(
                 'We\'ve sent a verification email to:',
@@ -415,17 +424,17 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 8),
-              
+
               // Email display
               Text(
                 email,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 16),
-              
+
               // Instructions
               Text(
                 'Please check your email and click the verification link to continue.',
@@ -433,7 +442,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 32),
-              
+
               // Verify button
               PrimaryButton(
                 text: 'I\'ve Verified My Email',
@@ -442,21 +451,21 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                 icon: Icons.check_circle_outline,
               ),
               const SizedBox(height: 16),
-              
+
               // Resend email button
               TextButton.icon(
-                onPressed: _timerSeconds > 0 || _isResending 
-                    ? null 
+                onPressed: _timerSeconds > 0 || _isResending
+                    ? null
                     : _resendVerificationEmail,
                 icon: const Icon(Icons.refresh),
                 label: Text(
-                  _timerSeconds > 0 
-                      ? 'Resend Email (${_timerSeconds}s)' 
+                  _timerSeconds > 0
+                      ? 'Resend Email (${_timerSeconds}s)'
                       : 'Resend Verification Email',
                 ),
               ),
               const SizedBox(height: 32),
-              
+
               // Help text
               Container(
                 padding: const EdgeInsets.all(16),
@@ -489,7 +498,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       ),
     );
   }
-  
+
   /// Check if Lottie animation file exists
   Future<bool> _lottieExists(String assetPath) async {
     try {
@@ -500,4 +509,4 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       return false;
     }
   }
-} 
+}

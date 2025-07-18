@@ -18,4 +18,4 @@ class PlatformSpecificFile {
       return false;
     }
   }
-} 
+}

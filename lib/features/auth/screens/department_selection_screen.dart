@@ -20,11 +20,13 @@ class DepartmentSelectionScreen extends StatefulWidget {
   });
 
   @override
-  State<DepartmentSelectionScreen> createState() => _DepartmentSelectionScreenState();
+  State<DepartmentSelectionScreen> createState() =>
+      _DepartmentSelectionScreenState();
 }
 
 class _DepartmentSelectionScreenState extends State<DepartmentSelectionScreen> {
-  String _selectedDepartment = AppConstants.departments[0]; // Default to first department
+  String _selectedDepartment =
+      AppConstants.departments[0]; // Default to first department
   List<String> _selectedSubjects = [];
   bool _isLoading = false;
 
@@ -37,9 +39,10 @@ class _DepartmentSelectionScreenState extends State<DepartmentSelectionScreen> {
   void _updateSelectedSubjects() {
     // Initialize with core subjects that are always selected
     _selectedSubjects = List<String>.from(AppConstants.coreSubjects);
-    
+
     // Add first non-core subject from the department if available
-    final departmentSubjects = AppConstants.subjectsByDepartment[_selectedDepartment] ?? [];
+    final departmentSubjects =
+        AppConstants.subjectsByDepartment[_selectedDepartment] ?? [];
     for (final subject in departmentSubjects) {
       if (!AppConstants.coreSubjects.contains(subject)) {
         _selectedSubjects.add(subject);
@@ -59,7 +62,8 @@ class _DepartmentSelectionScreenState extends State<DepartmentSelectionScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -84,7 +88,8 @@ class _DepartmentSelectionScreenState extends State<DepartmentSelectionScreen> {
                   const SizedBox(height: 16),
 
                   // Department selection cards - more compact
-                  ...AppConstants.departments.map((department) => _buildDepartmentCard(department)),
+                  ...AppConstants.departments
+                      .map((department) => _buildDepartmentCard(department)),
 
                   const SizedBox(height: 16),
 
@@ -143,7 +148,7 @@ class _DepartmentSelectionScreenState extends State<DepartmentSelectionScreen> {
   Widget _buildDepartmentCard(String department) {
     final isSelected = department == _selectedDepartment;
     final subjects = AppConstants.subjectsByDepartment[department] ?? [];
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       elevation: isSelected ? 2 : 1,
@@ -182,7 +187,7 @@ class _DepartmentSelectionScreenState extends State<DepartmentSelectionScreen> {
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               const SizedBox(width: 8),
-              
+
               // Department info
               Expanded(
                 child: Column(
@@ -205,7 +210,7 @@ class _DepartmentSelectionScreenState extends State<DepartmentSelectionScreen> {
                   ],
                 ),
               ),
-              
+
               // Icon
               Icon(
                 _getDepartmentIcon(department),
@@ -220,16 +225,18 @@ class _DepartmentSelectionScreenState extends State<DepartmentSelectionScreen> {
   }
 
   List<Widget> _buildSubjectCheckboxes() {
-    final departmentSubjects = AppConstants.subjectsByDepartment[_selectedDepartment] ?? [];
-    
+    final departmentSubjects =
+        AppConstants.subjectsByDepartment[_selectedDepartment] ?? [];
+
     return departmentSubjects.map((subject) {
       final isCoreSubject = AppConstants.coreSubjects.contains(subject);
       final isSelected = _selectedSubjects.contains(subject);
-      
+
       return CheckboxListTile(
         title: Text(subject),
         subtitle: isCoreSubject
-            ? const Text('Core subject (required)', style: TextStyle(fontSize: 12))
+            ? const Text('Core subject (required)',
+                style: TextStyle(fontSize: 12))
             : null,
         value: isSelected,
         onChanged: isCoreSubject
@@ -279,9 +286,11 @@ class _DepartmentSelectionScreenState extends State<DepartmentSelectionScreen> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      
+
       // If we have registration data (coming from registration flow), register the user
-      if (widget.email != null && widget.password != null && widget.name != null) {
+      if (widget.email != null &&
+          widget.password != null &&
+          widget.name != null) {
         await authProvider.register(
           email: widget.email!,
           password: widget.password!,
@@ -289,46 +298,54 @@ class _DepartmentSelectionScreenState extends State<DepartmentSelectionScreen> {
           department: _selectedDepartment,
           selectedSubjects: _selectedSubjects,
         );
-        
+
         if (mounted) {
           // Navigate to email verification screen
-          Navigator.pushReplacementNamed(context, AppConstants.emailVerificationRoute);
-          
+          Navigator.pushReplacementNamed(
+              context, AppConstants.emailVerificationRoute);
+
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Account created successfully! Please verify your email.')),
+            const SnackBar(
+                content: Text(
+                    'Account created successfully! Please verify your email.')),
           );
         }
-      } 
+      }
       // Otherwise update the existing user's department and subjects (coming after email verification)
       else {
-        print('DepartmentSelectionScreen: Updating user profile with department: $_selectedDepartment');
-        print('DepartmentSelectionScreen: Selected subjects: $_selectedSubjects');
-        
+        print(
+            'DepartmentSelectionScreen: Updating user profile with department: $_selectedDepartment');
+        print(
+            'DepartmentSelectionScreen: Selected subjects: $_selectedSubjects');
+
         try {
           // Update the user's department and subjects
           await authProvider.updateUserProfile(
             department: _selectedDepartment,
             selectedSubjects: _selectedSubjects,
           );
-          
+
           print('DepartmentSelectionScreen: Profile updated successfully');
-          
+
           if (mounted) {
             // Navigate to dashboard
             print('DepartmentSelectionScreen: Navigating to dashboard...');
-            Navigator.pushReplacementNamed(context, AppConstants.dashboardRoute);
-            
+            Navigator.pushReplacementNamed(
+                context, AppConstants.dashboardRoute);
+
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Profile updated successfully!')),
             );
           }
         } catch (updateError) {
-          print('DepartmentSelectionScreen: Error updating profile: $updateError');
-          
+          print(
+              'DepartmentSelectionScreen: Error updating profile: $updateError');
+
           // If Firebase update fails, we'll still update the local UI and proceed to dashboard
           if (mounted) {
-            print('DepartmentSelectionScreen: Firebase update failed, proceeding with local update only');
-            
+            print(
+                'DepartmentSelectionScreen: Firebase update failed, proceeding with local update only');
+
             // Update local AuthProvider state
             if (authProvider.user != null) {
               final updatedUser = authProvider.user!.copyWith(
@@ -337,14 +354,17 @@ class _DepartmentSelectionScreenState extends State<DepartmentSelectionScreen> {
               );
               authProvider.updateLocalUserData(updatedUser);
             }
-            
+
             // Navigate to dashboard even after error
-            print('DepartmentSelectionScreen: Forcing navigation to dashboard after Firebase failure');
-            Navigator.pushReplacementNamed(context, AppConstants.dashboardRoute);
-            
+            print(
+                'DepartmentSelectionScreen: Forcing navigation to dashboard after Firebase failure');
+            Navigator.pushReplacementNamed(
+                context, AppConstants.dashboardRoute);
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text('Profile saved locally. Some features may be limited.'),
+                content: const Text(
+                    'Profile saved locally. Some features may be limited.'),
                 duration: const Duration(seconds: 5),
               ),
             );
@@ -366,4 +386,4 @@ class _DepartmentSelectionScreenState extends State<DepartmentSelectionScreen> {
       }
     }
   }
-} 
+}

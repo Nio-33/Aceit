@@ -39,5 +39,22 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    
+    # Optimize build settings for faster compilation
+    target.build_configurations.each do |config|
+      # Use only active architecture for debug builds
+      config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES' if config.name == 'Debug'
+      
+      # Enable compiler optimizations
+      config.build_settings['GCC_OPTIMIZATION_LEVEL'] = '0' if config.name == 'Debug'
+      config.build_settings['SWIFT_OPTIMIZATION_LEVEL'] = '-Onone' if config.name == 'Debug'
+      
+      # Exclude arm64 for simulators to speed up builds
+      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+      
+      # Enable parallel compilation
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'COCOAPODS=1'
+    end
   end
 end

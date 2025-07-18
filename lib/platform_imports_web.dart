@@ -12,4 +12,4 @@ class PlatformSpecificFile {
     // Web platform can't create files in the local file system
     return false;
   }
-} 
+}

@@ -9,43 +9,43 @@ import 'package:aceit/core/theme/app_theme.dart';
 class CustomTextField extends StatelessWidget {
   /// Controller for the text field
   final TextEditingController controller;
-  
+
   /// Label text displayed above the field
   final String labelText;
-  
+
   /// Hint text displayed inside the field when empty
   final String? hintText;
-  
+
   /// Whether to obscure text (for passwords)
   final bool obscureText;
-  
+
   /// Optional prefix icon
   final IconData? prefixIcon;
-  
+
   /// Optional suffix icon
   final IconData? suffixIcon;
-  
+
   /// Optional action when suffix icon is pressed
   final VoidCallback? onSuffixIconPressed;
-  
+
   /// Text input type (defaults to text)
   final TextInputType keyboardType;
-  
+
   /// Optional validation function
   final String? Function(String?)? validator;
-  
+
   /// Whether the field is enabled
   final bool enabled;
-  
+
   /// Optional helper text below the field
   final String? helperText;
-  
+
   /// Maximum number of characters allowed
   final int? maxLength;
-  
+
   /// Action to perform on field submission
   final void Function(String)? onSubmitted;
-  
+
   /// Input formatters for special formatting requirements
   final List<TextInputFormatter>? inputFormatters;
 
@@ -71,7 +71,7 @@ class CustomTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -106,14 +106,14 @@ class CustomTextField extends StatelessWidget {
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(
-                color: AppTheme.primaryColor.withOpacity(0.3),
+                color: AppTheme.primaryColor.withValues(alpha: 0.3),
                 width: 1.0,
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(
-                color: AppTheme.primaryColor.withOpacity(0.3),
+                color: AppTheme.primaryColor.withValues(alpha: 0.3),
                 width: 1.0,
               ),
             ),
@@ -139,8 +139,8 @@ class CustomTextField extends StatelessWidget {
               ),
             ),
             filled: true,
-            fillColor: enabled 
-                ? theme.cardColor 
+            fillColor: enabled
+                ? theme.cardColor
                 : theme.disabledColor.withOpacity(0.1),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -151,4 +151,4 @@ class CustomTextField extends StatelessWidget {
       ],
     );
   }
-} 
+}

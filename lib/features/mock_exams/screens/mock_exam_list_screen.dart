@@ -1,9 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../features/auth/providers/auth_provider.dart';
+import '../../../features/quiz/screens/quiz_taking_screen.dart';
+import '../../../widgets/common/primary_button.dart';
 
-class MockExamListScreen extends StatelessWidget {
+class MockExamListScreen extends StatefulWidget {
   const MockExamListScreen({super.key});
+
+  @override
+  State<MockExamListScreen> createState() => _MockExamListScreenState();
+}
+
+class _MockExamListScreenState extends State<MockExamListScreen> {
+  String _selectedExamType = 'WAEC';
+
+  void _startMockExam(String subject, String examType) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final user = authProvider.user;
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please login to start exam')),
+      );
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => QuizTakingScreen(
+          userId: user.id,
+          quizType: 'mock_exam',
+          subject: subject,
+          examType: examType,
+          durationInMinutes: _getDurationForExam(examType),
+        ),
+      ),
+    );
+  }
+
+  int _getDurationForExam(String examType) {
+    switch (examType) {
+      case 'JAMB':
+        return 120; // 2 hours
+      case 'WAEC':
+        return 180; // 3 hours
+      case 'NECO':
+        return 150; // 2.5 hours
+      default:
+        return 120;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,15 +82,21 @@ class MockExamListScreen extends StatelessWidget {
                   margin: const EdgeInsets.only(right: 8),
                   child: ChoiceChip(
                     label: Text(examType),
-                    selected: index == 0, // Default: first one selected
+                    selected: examType == _selectedExamType,
                     onSelected: (selected) {
-                      // Filter exams by type
+                      setState(() {
+                        _selectedExamType = examType;
+                      });
                     },
                     backgroundColor: Colors.grey[200],
                     selectedColor: AppTheme.primaryColor.withOpacity(0.2),
                     labelStyle: TextStyle(
-                      color: index == 0 ? AppTheme.primaryColor : Colors.black,
-                      fontWeight: index == 0 ? FontWeight.bold : FontWeight.normal,
+                      color: examType == _selectedExamType
+                          ? AppTheme.primaryColor
+                          : Colors.black,
+                      fontWeight: examType == _selectedExamType
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                 );
@@ -50,14 +104,14 @@ class MockExamListScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // Mock Exam Cards
           ...List.generate(10, (index) {
             final subject = index % 2 == 0 ? 'Mathematics' : 'English';
             final examType = AppConstants.examTypes[index % 3];
             final duration = index % 2 == 0 ? '2 hours' : '1 hour 30 mins';
             final questions = (index + 1) * 10;
-            
+
             return Card(
               margin: const EdgeInsets.only(bottom: 16),
               shape: RoundedRectangleBorder(
@@ -139,14 +193,11 @@ class MockExamListScreen extends StatelessWidget {
                         // Start Button
                         SizedBox(
                           width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              // Navigate to mock exam screen
-                            },
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                            ),
-                            child: const Text('Start Exam'),
+                          child: PrimaryButton(
+                            text: 'Start Exam',
+                            onPressed: () =>
+                                _startMockExam(subject, _selectedExamType),
+                            icon: Icons.play_arrow,
                           ),
                         ),
                       ],
@@ -160,7 +211,7 @@ class MockExamListScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildExamDetail({
     required IconData icon,
     required String label,
@@ -189,4 +240,4 @@ class MockExamListScreen extends StatelessWidget {
       ),
     );
   }
-} 
+}

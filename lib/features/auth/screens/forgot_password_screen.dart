@@ -19,30 +19,30 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  
+
   bool _isLoading = false;
   bool _emailSent = false;
-  
+
   @override
   void dispose() {
     _emailController.dispose();
     super.dispose();
   }
-  
+
   Future<void> _resetPassword() async {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() {
         _isLoading = true;
       });
-      
+
       try {
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
         final email = _emailController.text.trim();
-        
+
         // Try to send reset email directly without checking if email exists
         // Firebase will handle non-existent emails gracefully
         await authProvider.resetPassword(email);
-        
+
         // Show success state
         if (mounted) {
           setState(() {
@@ -55,25 +55,28 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           setState(() {
             _isLoading = false;
           });
-          
+
           // Show a user-friendly error message
           String errorTitle = 'Reset Password Failed';
           String errorMessage;
-          
+
           if (e is Exception) {
-            if (e.toString().contains('user-not-found') || 
+            if (e.toString().contains('user-not-found') ||
                 e.toString().contains('invalid-email')) {
               errorTitle = 'Email Issue';
-              errorMessage = 'No account found with this email address. Please check the email or create a new account.';
+              errorMessage =
+                  'No account found with this email address. Please check the email or create a new account.';
             } else if (e.toString().contains('network')) {
-              errorMessage = 'Network error. Please check your internet connection and try again.';
+              errorMessage =
+                  'Network error. Please check your internet connection and try again.';
             } else {
-              errorMessage = 'There was a problem sending the password reset email. Please try again later.';
+              errorMessage =
+                  'There was a problem sending the password reset email. Please try again later.';
             }
           } else {
             errorMessage = 'An unexpected error occurred. Please try again.';
           }
-          
+
           await ErrorHandler.showErrorDialog(
             context,
             errorTitle,
@@ -83,7 +86,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       }
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,7 +103,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       ),
     );
   }
-  
+
   Widget _buildFormState() {
     return Form(
       key: _formKey,
@@ -114,17 +117,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             color: AppTheme.primaryColor,
           ),
           const SizedBox(height: 24),
-          
+
           // Title
           Text(
             'Reset Your Password',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
-          
+
           // Instructions
           Text(
             'Enter your email address and we\'ll send you a link to reset your password.',
@@ -132,7 +135,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: 32),
-          
+
           // Email field
           CustomTextField(
             controller: _emailController,
@@ -143,7 +146,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             validator: FormValidators.email,
           ),
           const SizedBox(height: 32),
-          
+
           // Reset password button
           PrimaryButton(
             text: 'Send Reset Link',
@@ -151,7 +154,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             onPressed: _resetPassword,
           ),
           const SizedBox(height: 24),
-          
+
           // Back to login link
           TextButton(
             onPressed: () {
@@ -163,7 +166,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       ),
     );
   }
-  
+
   Widget _buildSuccessState() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -175,17 +178,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           color: Colors.green,
         ),
         const SizedBox(height: 24),
-        
+
         // Success title
         Text(
           'Email Sent',
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
-        
+
         // Success message
         Text(
           'We\'ve sent a password reset link to:\n${_emailController.text}',
@@ -193,14 +196,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           style: Theme.of(context).textTheme.bodyLarge,
         ),
         const SizedBox(height: 16),
-        
+
         Text(
           'Please check your email and follow the instructions to reset your password.',
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodyMedium,
         ),
         const SizedBox(height: 32),
-        
+
         // Back to login button
         PrimaryButton(
           text: 'Back to Login',
@@ -209,7 +212,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           },
         ),
         const SizedBox(height: 24),
-        
+
         // Didn't receive link
         TextButton(
           onPressed: () {
@@ -222,4 +225,4 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       ],
     );
   }
-} 
+}

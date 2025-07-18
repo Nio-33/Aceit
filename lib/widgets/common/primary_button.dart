@@ -2,37 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:aceit/core/theme/app_theme.dart';
 
 /// A standardized primary button component used throughout the app.
-/// 
+///
 /// This button has the app's primary color, rounded corners, and consistent padding.
 /// It supports various states including loading, disabled, and customization options.
 class PrimaryButton extends StatelessWidget {
   /// Text to display on the button
   final String text;
-  
+
   /// Action to perform when button is pressed
-  final VoidCallback onPressed;
-  
+  final VoidCallback? onPressed;
+
   /// Whether the button should show a loading indicator
   final bool isLoading;
-  
+
   /// Whether the button is in a disabled state
   final bool isDisabled;
-  
+
   /// Icon to display before text (optional)
   final IconData? icon;
-  
+
   /// Button width (defaults to max width)
   final double? width;
-  
+
   /// Button height (defaults to standard height)
   final double? height;
-  
+
   /// Custom background color (uses theme primary color by default)
   final Color? backgroundColor;
-  
+
   /// Custom text color (uses white by default)
   final Color? textColor;
-  
+
+  /// Custom border color for outlined buttons
+  final Color? borderColor;
+
+  /// Custom font size for button text
+  final double? fontSize;
+
   /// Creates a primary button with standardized styling.
   const PrimaryButton({
     super.key,
@@ -45,12 +51,14 @@ class PrimaryButton extends StatelessWidget {
     this.height = 50,
     this.backgroundColor,
     this.textColor,
+    this.borderColor,
+    this.fontSize,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return SizedBox(
       width: width ?? double.infinity,
       height: height,
@@ -59,9 +67,12 @@ class PrimaryButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor ?? AppTheme.primaryColor,
           foregroundColor: textColor ?? Colors.white,
-          disabledBackgroundColor: AppTheme.primaryColor.withOpacity(0.6),
+          disabledBackgroundColor: AppTheme.primaryColor.withValues(alpha: 0.6),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
+            side: borderColor != null
+                ? BorderSide(color: borderColor!, width: 2.0)
+                : BorderSide.none,
           ),
           elevation: 3,
         ),
@@ -87,6 +98,7 @@ class PrimaryButton extends StatelessWidget {
                     style: theme.textTheme.labelLarge?.copyWith(
                       color: textColor ?? Colors.white,
                       fontWeight: FontWeight.bold,
+                      fontSize: fontSize,
                     ),
                   ),
                 ],
@@ -94,4 +106,4 @@ class PrimaryButton extends StatelessWidget {
       ),
     );
   }
-} 
+}

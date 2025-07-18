@@ -14,7 +14,7 @@ class StreakCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isStreakActive = AppUtils.isStreakMaintained(lastLoginDate);
-    
+
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(

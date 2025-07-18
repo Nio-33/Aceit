@@ -13,7 +13,7 @@ class FirebaseConfigScreen extends StatefulWidget {
 
 class _FirebaseConfigScreenState extends State<FirebaseConfigScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   final _apiKeyController = TextEditingController();
   final _authDomainController = TextEditingController();
   final _projectIdController = TextEditingController();
@@ -21,7 +21,7 @@ class _FirebaseConfigScreenState extends State<FirebaseConfigScreen> {
   final _messagingSenderIdController = TextEditingController();
   final _appIdController = TextEditingController();
   final _measurementIdController = TextEditingController();
-  
+
   bool _isLoading = false;
 
   @override
@@ -54,7 +54,7 @@ class _FirebaseConfigScreenState extends State<FirebaseConfigScreen> {
       setState(() {
         _isLoading = true;
       });
-      
+
       try {
         final success = await EnvGenerator.generateEnvFile(
           apiKey: _apiKeyController.text,
@@ -63,11 +63,11 @@ class _FirebaseConfigScreenState extends State<FirebaseConfigScreen> {
           storageBucket: _storageBucketController.text,
           messagingSenderId: _messagingSenderIdController.text,
           appId: _appIdController.text,
-          measurementId: _measurementIdController.text.isNotEmpty 
-              ? _measurementIdController.text 
+          measurementId: _measurementIdController.text.isNotEmpty
+              ? _measurementIdController.text
               : null,
         );
-        
+
         if (success && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -77,7 +77,7 @@ class _FirebaseConfigScreenState extends State<FirebaseConfigScreen> {
               backgroundColor: Colors.green,
             ),
           );
-          
+
           // Return to the previous screen
           Navigator.pop(context);
         } else if (mounted) {
@@ -128,7 +128,7 @@ class _FirebaseConfigScreenState extends State<FirebaseConfigScreen> {
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
             const SizedBox(height: 24),
-            
+
             // API Key
             TextFormField(
               controller: _apiKeyController,
@@ -145,7 +145,7 @@ class _FirebaseConfigScreenState extends State<FirebaseConfigScreen> {
               },
             ),
             const SizedBox(height: 16),
-            
+
             // Auth Domain
             TextFormField(
               controller: _authDomainController,
@@ -162,7 +162,7 @@ class _FirebaseConfigScreenState extends State<FirebaseConfigScreen> {
               },
             ),
             const SizedBox(height: 16),
-            
+
             // Project ID
             TextFormField(
               controller: _projectIdController,
@@ -179,7 +179,7 @@ class _FirebaseConfigScreenState extends State<FirebaseConfigScreen> {
               },
             ),
             const SizedBox(height: 16),
-            
+
             // Storage Bucket
             TextFormField(
               controller: _storageBucketController,
@@ -196,7 +196,7 @@ class _FirebaseConfigScreenState extends State<FirebaseConfigScreen> {
               },
             ),
             const SizedBox(height: 16),
-            
+
             // Messaging Sender ID
             TextFormField(
               controller: _messagingSenderIdController,
@@ -217,7 +217,7 @@ class _FirebaseConfigScreenState extends State<FirebaseConfigScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // App ID
             TextFormField(
               controller: _appIdController,
@@ -234,7 +234,7 @@ class _FirebaseConfigScreenState extends State<FirebaseConfigScreen> {
               },
             ),
             const SizedBox(height: 16),
-            
+
             // Measurement ID (optional)
             TextFormField(
               controller: _measurementIdController,
@@ -245,7 +245,7 @@ class _FirebaseConfigScreenState extends State<FirebaseConfigScreen> {
               ),
             ),
             const SizedBox(height: 32),
-            
+
             // Save button
             ElevatedButton(
               onPressed: _isLoading ? null : _saveConfiguration,
@@ -272,7 +272,7 @@ class _FirebaseConfigScreenState extends State<FirebaseConfigScreen> {
                     ),
             ),
             const SizedBox(height: 16),
-            
+
             // Note
             Container(
               padding: const EdgeInsets.all(12),
@@ -310,4 +310,4 @@ class _FirebaseConfigScreenState extends State<FirebaseConfigScreen> {
       ),
     );
   }
-} 
+}

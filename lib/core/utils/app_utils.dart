@@ -6,14 +6,15 @@ class AppUtils {
   static String formatDate(DateTime date) {
     return DateFormat('MMM dd, yyyy').format(date);
   }
-  
+
   // Format a time to a readable string
   static String formatTime(DateTime time) {
     return DateFormat('hh:mm a').format(time);
   }
-  
+
   // Show a snackbar message
-  static void showSnackBar(BuildContext context, String message, {bool isError = false}) {
+  static void showSnackBar(BuildContext context, String message,
+      {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -23,7 +24,7 @@ class AppUtils {
       ),
     );
   }
-  
+
   // Show a loading dialog
   static void showLoadingDialog(BuildContext context) {
     showDialog(
@@ -41,7 +42,7 @@ class AppUtils {
       ),
     );
   }
-  
+
   // Parse a duration string (e.g., "45m" to Duration)
   static Duration parseDuration(String durationStr) {
     if (durationStr.contains('h')) {
@@ -55,54 +56,54 @@ class AppUtils {
       return const Duration(minutes: 30);
     }
   }
-  
+
   // Format a duration to a readable string (e.g., 1h 30m)
   static String formatDuration(Duration duration) {
     final hours = duration.inHours;
     final minutes = duration.inMinutes.remainder(60);
-    
+
     if (hours > 0) {
       return '$hours${hours == 1 ? 'hr' : 'hrs'} ${minutes > 0 ? '$minutes${minutes == 1 ? 'min' : 'mins'}' : ''}';
     } else {
       return '$minutes${minutes == 1 ? 'min' : 'mins'}';
     }
   }
-  
+
   // Format a percentage (e.g., 0.75 to 75%)
   static String formatPercentage(double percentage) {
     return '${(percentage * 100).toInt()}%';
   }
-  
+
   // Check if user streak is maintained (used for streak calculations)
   static bool isStreakMaintained(DateTime lastLoginDate) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
     final lastLogin = DateTime(
-      lastLoginDate.year, 
-      lastLoginDate.month, 
+      lastLoginDate.year,
+      lastLoginDate.month,
       lastLoginDate.day,
     );
-    
+
     // Streak is maintained if user logged in today or yesterday
-    return lastLogin.isAtSameMomentAs(today) || 
-           lastLogin.isAtSameMomentAs(yesterday);
+    return lastLogin.isAtSameMomentAs(today) ||
+        lastLogin.isAtSameMomentAs(yesterday);
   }
-  
+
   // Convert milliseconds to seconds:minutes:seconds format
   static String formatMilliseconds(int milliseconds) {
     final seconds = (milliseconds / 1000).floor();
     final minutes = (seconds / 60).floor();
     final remainingSeconds = seconds % 60;
-    
+
     final minutesStr = minutes.toString().padLeft(2, '0');
     final secondsStr = remainingSeconds.toString().padLeft(2, '0');
-    
+
     return '$minutesStr:$secondsStr';
   }
-  
+
   // Generate a random quiz ID
   static String generateQuizId() {
     return 'quiz_${DateTime.now().millisecondsSinceEpoch}';
   }
-} 
+}

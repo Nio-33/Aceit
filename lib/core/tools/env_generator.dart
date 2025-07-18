@@ -20,7 +20,7 @@ class EnvGenerator {
       print('Web platform - skipping .env file creation');
       return false;
     }
-    
+
     try {
       // Prepare the content of the .env file
       final content = '''
@@ -36,20 +36,20 @@ ${measurementId != null ? 'FIREBASE_MEASUREMENT_ID=$measurementId' : ''}
 
       // Create the .env file using platform-specific implementation
       final success = await PlatformFile.create('.env', content);
-      
+
       if (success) {
         print('Generated .env file successfully');
       } else {
         print('Failed to generate .env file');
       }
-      
+
       return success;
     } catch (e) {
       print('Error generating .env file: $e');
       return false;
     }
   }
-  
+
   /// Generate a .env file with the Firebase credentials from FirebaseCredentials
   static Future<bool> generateDefaultEnvFile() async {
     return generateEnvFile(
@@ -62,18 +62,25 @@ ${measurementId != null ? 'FIREBASE_MEASUREMENT_ID=$measurementId' : ''}
       measurementId: FirebaseCredentials.measurementId,
     );
   }
-  
+
   /// Show a dialog to collect Firebase configuration
   static Future<void> showConfigDialog(BuildContext context) async {
     // Pre-fill with Firebase credentials from FirebaseCredentials
-    final apiKeyController = TextEditingController(text: FirebaseCredentials.apiKey);
-    final authDomainController = TextEditingController(text: FirebaseCredentials.authDomain);
-    final projectIdController = TextEditingController(text: FirebaseCredentials.projectId);
-    final storageBucketController = TextEditingController(text: FirebaseCredentials.storageBucket);
-    final messagingSenderIdController = TextEditingController(text: FirebaseCredentials.messagingSenderId);
-    final appIdController = TextEditingController(text: FirebaseCredentials.appId);
-    final measurementIdController = TextEditingController(text: FirebaseCredentials.measurementId);
-    
+    final apiKeyController =
+        TextEditingController(text: FirebaseCredentials.apiKey);
+    final authDomainController =
+        TextEditingController(text: FirebaseCredentials.authDomain);
+    final projectIdController =
+        TextEditingController(text: FirebaseCredentials.projectId);
+    final storageBucketController =
+        TextEditingController(text: FirebaseCredentials.storageBucket);
+    final messagingSenderIdController =
+        TextEditingController(text: FirebaseCredentials.messagingSenderId);
+    final appIdController =
+        TextEditingController(text: FirebaseCredentials.appId);
+    final measurementIdController =
+        TextEditingController(text: FirebaseCredentials.measurementId);
+
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -152,21 +159,22 @@ ${measurementId != null ? 'FIREBASE_MEASUREMENT_ID=$measurementId' : ''}
         ],
       ),
     );
-    
+
     if (result == true) {
       if (kIsWeb) {
         // On web, we can't create files, so just show a message
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Firebase configuration updated in memory for this session. Note: .env files cannot be created on web platform.'),
+              content: Text(
+                  'Firebase configuration updated in memory for this session. Note: .env files cannot be created on web platform.'),
               backgroundColor: Colors.orange,
             ),
           );
         }
         return;
       }
-      
+
       final success = await generateEnvFile(
         apiKey: apiKeyController.text,
         authDomain: authDomainController.text,
@@ -174,28 +182,30 @@ ${measurementId != null ? 'FIREBASE_MEASUREMENT_ID=$measurementId' : ''}
         storageBucket: storageBucketController.text,
         messagingSenderId: messagingSenderIdController.text,
         appId: appIdController.text,
-        measurementId: measurementIdController.text.isNotEmpty 
-            ? measurementIdController.text 
+        measurementId: measurementIdController.text.isNotEmpty
+            ? measurementIdController.text
             : null,
       );
-      
+
       if (success && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('.env file generated successfully. Please restart the app.'),
+            content: Text(
+                '.env file generated successfully. Please restart the app.'),
             backgroundColor: Colors.green,
           ),
         );
       } else if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Failed to generate .env file. Please check permissions.'),
+            content:
+                Text('Failed to generate .env file. Please check permissions.'),
             backgroundColor: Colors.red,
           ),
         );
       }
     }
-    
+
     // Dispose controllers
     apiKeyController.dispose();
     authDomainController.dispose();
@@ -205,4 +215,4 @@ ${measurementId != null ? 'FIREBASE_MEASUREMENT_ID=$measurementId' : ''}
     appIdController.dispose();
     measurementIdController.dispose();
   }
-} 
+}

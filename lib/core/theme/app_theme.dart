@@ -110,7 +110,7 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
-        contentPadding: 
+        contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -139,4 +139,4 @@ class AppTheme {
     // This can be expanded later for a proper dark theme
     return lightTheme();
   }
-} 
+}

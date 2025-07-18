@@ -13,7 +13,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final user = authProvider.user;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Profile'),
@@ -74,7 +74,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 32),
-                
+
                 // Stats Section
                 const Text(
                   'Your Statistics',
@@ -84,7 +84,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -98,7 +98,7 @@ class ProfileScreen extends StatelessWidget {
                           value: '${user.currentStreak} days',
                         ),
                         const Divider(),
-                        
+
                         // Total Points
                         _buildStatItem(
                           icon: Icons.stars,
@@ -107,7 +107,7 @@ class ProfileScreen extends StatelessWidget {
                           value: '${user.points} pts',
                         ),
                         const Divider(),
-                        
+
                         // Subjects
                         _buildStatItem(
                           icon: Icons.book,
@@ -120,7 +120,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 32),
-                
+
                 // Your Subjects Section
                 const Text(
                   'Your Subjects',
@@ -130,7 +130,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -140,7 +140,8 @@ class ProfileScreen extends StatelessWidget {
                       children: user.selectedSubjects.map((subject) {
                         return Chip(
                           label: Text(subject),
-                          backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
+                          backgroundColor:
+                              AppTheme.primaryColor.withOpacity(0.1),
                           labelStyle: TextStyle(
                             color: AppTheme.primaryColor,
                           ),
@@ -150,7 +151,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 32),
-                
+
                 // Account Actions
                 const Text(
                   'Account',
@@ -160,7 +161,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 ListTile(
                   leading: const Icon(Icons.edit),
                   title: const Text('Edit Profile'),
@@ -199,38 +200,43 @@ class ProfileScreen extends StatelessWidget {
                     );
                   },
                 ),
-                
+
                 // Auto-generate Firebase Config option (hidden on web)
                 if (!kIsWeb)
                   ListTile(
-                    leading: const Icon(Icons.auto_fix_high, color: Colors.amber),
+                    leading:
+                        const Icon(Icons.auto_fix_high, color: Colors.amber),
                     title: const Text('Auto-Generate Firebase Config'),
-                    subtitle: const Text('Create .env file with default Firebase credentials'),
+                    subtitle: const Text(
+                        'Create .env file with default Firebase credentials'),
                     onTap: () async {
                       // Show confirmation dialog
                       final shouldGenerate = await showDialog<bool>(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Auto-Generate Firebase Config'),
-                          content: const Text(
-                            'This will automatically create a .env file with the Firebase credentials from the project. Continue?'
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, false),
-                              child: const Text('Cancel'),
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title:
+                                  const Text('Auto-Generate Firebase Config'),
+                              content: const Text(
+                                  'This will automatically create a .env file with the Firebase credentials from the project. Continue?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text('Generate'),
+                                ),
+                              ],
                             ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              child: const Text('Generate'),
-                            ),
-                          ],
-                        ),
-                      ) ?? false;
-                      
+                          ) ??
+                          false;
+
                       if (shouldGenerate) {
                         try {
-                          final success = await EnvGenerator.generateDefaultEnvFile();
+                          final success =
+                              await EnvGenerator.generateDefaultEnvFile();
                           if (success && context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -263,7 +269,7 @@ class ProfileScreen extends StatelessWidget {
                       }
                     },
                   ),
-                
+
                 ListTile(
                   leading: const Icon(Icons.logout, color: Colors.red),
                   title: const Text(
@@ -285,9 +291,13 @@ class ProfileScreen extends StatelessWidget {
                             child: const Text('Cancel'),
                           ),
                           TextButton(
-                            onPressed: () {
-                              authProvider.signOut();
-                              Navigator.pop(context);
+                            onPressed: () async {
+                              Navigator.pop(context); // Close dialog first
+
+                              // Use forceLogout for immediate logout
+                              authProvider.forceLogout();
+
+                              // Navigation will be handled by the AuthProvider state change
                             },
                             child: const Text('Logout'),
                           ),
@@ -300,7 +310,7 @@ class ProfileScreen extends StatelessWidget {
             ),
     );
   }
-  
+
   Widget _buildStatItem({
     required IconData icon,
     required Color iconColor,
@@ -335,4 +345,4 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
-} 
+}

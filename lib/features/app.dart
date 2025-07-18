@@ -33,7 +33,7 @@ class _AceItAppState extends State<AceItApp> {
     try {
       final prefs = await SharedPreferences.getInstance();
       setState(() {
-        _isOnboardingCompleted = 
+        _isOnboardingCompleted =
             prefs.getBool(AppConstants.onboardingCompletedKey) ?? false;
         _isLoading = false;
       });
@@ -50,8 +50,9 @@ class _AceItAppState extends State<AceItApp> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
-    print('AceItApp.build: AuthProvider status: ${authProvider.status}, isLoading: ${authProvider.isLoading}');
-    
+    print(
+        'AceItApp.build: AuthProvider status: ${authProvider.status}, isLoading: ${authProvider.isLoading}');
+
     // Show loading indicator while checking preferences
     if (_isLoading) {
       print('AceItApp.build: Showing loading screen (checking preferences)');
@@ -88,4 +89,4 @@ class _AceItAppState extends State<AceItApp> {
         return const EmailVerificationScreen();
     }
   }
-} 
+}

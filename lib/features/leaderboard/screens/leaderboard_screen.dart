@@ -10,7 +10,7 @@ class LeaderboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final currentUser = authProvider.user;
-    
+
     // Create mock leaderboard data
     final leaderboardUsers = List.generate(
       20,
@@ -19,12 +19,12 @@ class LeaderboardScreen extends StatelessWidget {
         name: 'User ${index + 1}',
         points: 1000 - (index * 42),
         rank: index + 1,
-        department: index % 3 == 0 
-            ? 'Science' 
+        department: index % 3 == 0
+            ? 'Science'
             : (index % 3 == 1 ? 'Arts' : 'Commercial'),
       ),
     );
-    
+
     // Find current user's position
     int currentUserPosition = -1;
     if (currentUser != null) {
@@ -34,12 +34,12 @@ class LeaderboardScreen extends StatelessWidget {
           break;
         }
       }
-      
+
       if (currentUserPosition == -1) {
         currentUserPosition = leaderboardUsers.length;
       }
     }
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Leaderboard'),
@@ -64,10 +64,10 @@ class LeaderboardScreen extends StatelessWidget {
                   currentUserPosition + 1,
                   currentUser.department,
                 ),
-                
+
                 // Tabs for switching between Weekly/Monthly/All-time
                 _buildLeaderboardTabs(context),
-                
+
                 // Leaderboard list
                 Expanded(
                   child: ListView.builder(
@@ -75,7 +75,7 @@ class LeaderboardScreen extends StatelessWidget {
                     itemCount: leaderboardUsers.length,
                     itemBuilder: (context, index) {
                       final user = leaderboardUsers[index];
-                      
+
                       return _buildLeaderboardItem(
                         context: context,
                         user: user,
@@ -88,7 +88,7 @@ class LeaderboardScreen extends StatelessWidget {
             ),
     );
   }
-  
+
   Widget _buildUserRankCard(
     BuildContext context,
     String name,
@@ -121,7 +121,7 @@ class LeaderboardScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          
+
           // User info
           Expanded(
             child: Column(
@@ -180,7 +180,7 @@ class LeaderboardScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildLeaderboardTabs(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(8),
@@ -194,8 +194,9 @@ class LeaderboardScreen extends StatelessWidget {
       ),
     );
   }
-  
-  Widget _buildTab(BuildContext context, String title, {required bool isSelected}) {
+
+  Widget _buildTab(BuildContext context, String title,
+      {required bool isSelected}) {
     return Expanded(
       child: InkWell(
         onTap: () {
@@ -204,7 +205,9 @@ class LeaderboardScreen extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? AppTheme.primaryColor.withOpacity(0.1) : Colors.transparent,
+            color: isSelected
+                ? AppTheme.primaryColor.withOpacity(0.1)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
@@ -219,7 +222,7 @@ class LeaderboardScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildLeaderboardItem({
     required BuildContext context,
     required LeaderboardUser user,
@@ -228,7 +231,7 @@ class LeaderboardScreen extends StatelessWidget {
     // Determine medal color for top 3
     Color? medalColor;
     IconData rankIcon = Icons.emoji_events;
-    
+
     if (user.rank == 1) {
       medalColor = Colors.amber; // Gold
     } else if (user.rank == 2) {
@@ -239,11 +242,13 @@ class LeaderboardScreen extends StatelessWidget {
       rankIcon = Icons.military_tech;
       medalColor = Colors.grey[700];
     }
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: isCurrentUser ? AppTheme.primaryColor.withOpacity(0.1) : Colors.white,
+        color: isCurrentUser
+            ? AppTheme.primaryColor.withOpacity(0.1)
+            : Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -260,10 +265,10 @@ class LeaderboardScreen extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 24,
-              backgroundColor: isCurrentUser 
-                  ? AppTheme.primaryColor.withOpacity(0.2) 
+              backgroundColor: isCurrentUser
+                  ? AppTheme.primaryColor.withOpacity(0.2)
                   : Colors.grey[200],
-              child: user.rank <= 3 
+              child: user.rank <= 3
                   ? Icon(
                       rankIcon,
                       color: medalColor,
@@ -272,8 +277,8 @@ class LeaderboardScreen extends StatelessWidget {
                   : Text(
                       '${user.rank}',
                       style: TextStyle(
-                        color: isCurrentUser 
-                            ? AppTheme.primaryColor 
+                        color: isCurrentUser
+                            ? AppTheme.primaryColor
                             : Colors.grey[800],
                         fontWeight: FontWeight.bold,
                       ),
@@ -291,9 +296,7 @@ class LeaderboardScreen extends StatelessWidget {
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: isCurrentUser 
-                ? AppTheme.primaryColor 
-                : Colors.grey[200],
+            color: isCurrentUser ? AppTheme.primaryColor : Colors.grey[200],
             borderRadius: BorderRadius.circular(16),
           ),
           child: Text(
@@ -316,7 +319,7 @@ class LeaderboardUser {
   final int points;
   final int rank;
   final String department;
-  
+
   LeaderboardUser({
     required this.id,
     required this.name,
@@ -324,4 +327,4 @@ class LeaderboardUser {
     required this.rank,
     required this.department,
   });
-} 
+}

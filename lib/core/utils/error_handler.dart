@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 class ErrorHandler {
   /// Private constructor to prevent instantiation
   ErrorHandler._();
-  
+
   /// Log error to console with standardized format
   static void logError(
     String source,
@@ -23,10 +23,10 @@ class ErrorHandler {
         print('STACK TRACE: $stackTrace');
       }
     }
-    
+
     // TODO: Implement remote error logging with Firebase Crashlytics
   }
-  
+
   /// Handle errors and return user-friendly messages
   static String getErrorMessage(dynamic error) {
     if (error is FirebaseAuthException) {
@@ -39,7 +39,7 @@ class ErrorHandler {
       return 'An unexpected error occurred. Please try again later.';
     }
   }
-  
+
   /// Get user-friendly messages for Firebase Auth errors
   static String _getFirebaseAuthErrorMessage(FirebaseAuthException error) {
     switch (error.code) {
@@ -69,7 +69,7 @@ class ErrorHandler {
         return 'Authentication error: ${error.message}';
     }
   }
-  
+
   /// Show error dialog with appropriate message
   static Future<void> showErrorDialog(
     BuildContext context,
@@ -77,7 +77,7 @@ class ErrorHandler {
     dynamic error,
   ) async {
     final errorMessage = getErrorMessage(error);
-    
+
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -92,7 +92,7 @@ class ErrorHandler {
       ),
     );
   }
-  
+
   /// Create a catch handler for async functions
   static Function(dynamic) createCatchHandler(
     String source, {
@@ -101,11 +101,11 @@ class ErrorHandler {
     return (error) {
       final stackTrace = StackTrace.current;
       logError(source, error, stackTrace);
-      
+
       final errorMessage = getErrorMessage(error);
       if (onError != null) {
         onError(errorMessage);
       }
     };
   }
-} 
+}

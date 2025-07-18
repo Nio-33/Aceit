@@ -2,24 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'core/theme/app_theme.dart';
-import 'features/app.dart';
-import 'features/auth/providers/auth_provider.dart';
-import 'features/auth/screens/login_screen.dart';
-import 'features/auth/screens/register_screen.dart';
-import 'features/auth/screens/forgot_password_screen.dart';
-import 'features/auth/screens/email_verification_screen.dart';
-
-import 'features/dashboard/screens/dashboard_screen.dart';
-import 'features/onboarding/screens/onboarding_screen.dart';
-import 'features/settings/screens/firebase_diagnostic_screen.dart';
-import 'core/config/firebase_config.dart';
-
-import 'core/constants/app_constants.dart';
-import 'env_example.dart';
-
+import 'package:aceit/core/theme/app_theme.dart';
+import 'package:aceit/features/app.dart';
+import 'package:aceit/features/auth/providers/auth_provider.dart';
+import 'package:aceit/features/quiz/providers/quiz_provider.dart';
+import 'package:aceit/features/flashcards/providers/flashcard_provider.dart';
+import 'package:aceit/features/auth/screens/welcome_screen.dart';
+import 'package:aceit/features/auth/screens/login_screen.dart';
+import 'package:aceit/features/auth/screens/register_screen.dart';
+import 'package:aceit/features/auth/screens/forgot_password_screen.dart';
+import 'package:aceit/features/auth/screens/email_verification_screen.dart';
+import 'package:aceit/features/dashboard/screens/dashboard_screen.dart';
+import 'package:aceit/features/onboarding/screens/onboarding_screen.dart';
+import 'package:aceit/features/settings/screens/firebase_diagnostic_screen.dart';
+import 'package:aceit/core/config/firebase_config.dart';
+import 'package:aceit/core/constants/app_constants.dart';
+import 'package:aceit/env_example.dart';
 
 // Global key for navigator to use in error handling
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -34,49 +33,53 @@ void main() async {
     FlutterError.presentError(details);
     debugPrint('FLUTTER ERROR: ${details.exception}');
     debugPrint('STACK TRACE: ${details.stack}');
-    
+
     // Record the error for display
-    globalErrorMessage = 'Flutter Error: ${details.exception}\n${details.stack}';
+    globalErrorMessage =
+        'Flutter Error: ${details.exception}\n${details.stack}';
     appStartupFailed = true;
   };
-  
+
   try {
     WidgetsFlutterBinding.ensureInitialized();
     debugPrint('Flutter binding initialized');
-    
+
     // Initialize Firebase with try-catch to gracefully handle errors
     bool firebaseInitialized = false;
-    
+
     try {
       // Load hardcoded credentials first
       _loadHardcodedCredentials();
       debugPrint('Loaded hardcoded Firebase credentials');
-      
+
       // Attempt to initialize Firebase but don't block app startup if it fails
       try {
-        // For iOS, we need to handle the missing GoogleService-Info.plist gracefully
-        if (FirebaseConfig.isConfigured) {
-          await Firebase.initializeApp(
-            options: FirebaseConfig.options,
-          );
+        // Try default initialization first (uses platform-specific config files)
+        try {
+          await Firebase.initializeApp();
           firebaseInitialized = true;
-          debugPrint('Firebase initialized successfully with configuration');
-          
+          debugPrint('Firebase initialized with default configuration');
+
           // Check authentication setup
           await _checkAuthenticationSetup();
-        } else {
-          // Try default initialization for iOS
-          try {
-            await Firebase.initializeApp();
+        } catch (firebaseError) {
+          debugPrint('Default Firebase initialization failed: $firebaseError');
+
+          // Fallback to manual configuration
+          if (FirebaseConfig.isConfigured) {
+            await Firebase.initializeApp(
+              options: FirebaseConfig.options,
+            );
             firebaseInitialized = true;
-            debugPrint('Firebase initialized with default configuration');
-            
+            debugPrint(
+                'Firebase initialized successfully with manual configuration');
+
             // Check authentication setup
             await _checkAuthenticationSetup();
-          } catch (firebaseError) {
-            debugPrint('Firebase initialization failed: $firebaseError');
+          } else {
+            debugPrint(
+                'Firebase initialization failed: No valid configuration found');
             debugPrint('App will run in demo mode without Firebase');
-            // Don't re-throw the error, just continue without Firebase
           }
         }
       } catch (e) {
@@ -89,7 +92,7 @@ void main() async {
       debugPrint('App will continue without full initialization');
       // Don't re-throw the error, just continue without Firebase
     }
-    
+
     // Run the app, even with initialization failures
     runApp(MyApp(firebaseInitialized: firebaseInitialized));
     debugPrint('App started successfully');
@@ -97,11 +100,11 @@ void main() async {
     // Capture any errors during startup
     debugPrint('CRITICAL ERROR DURING APP STARTUP: $e');
     debugPrint('STACK TRACE: $stackTrace');
-    
+
     // Set global error info
     globalErrorMessage = 'Startup Error: $e\n$stackTrace';
     appStartupFailed = true;
-    
+
     // Still try to run the app with an error screen
     runApp(const ErrorApp());
   }
@@ -157,8 +160,9 @@ class ErrorApp extends StatelessWidget {
 /// Check if Email/Password authentication is properly set up
 Future<void> _checkAuthenticationSetup() async {
   try {
-    // Try to fetch sign-in methods to check if authentication is configured
-    await firebase_auth.FirebaseAuth.instance.fetchSignInMethodsForEmail("test@example.com");
+    // Try to sign in with dummy credentials to check if authentication is configured
+    await firebase_auth.FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: "test@example.com", password: "dummy_password");
     debugPrint('✅ Firebase Authentication is properly configured');
   } catch (e) {
     if (e is firebase_auth.FirebaseAuthException) {
@@ -166,7 +170,8 @@ Future<void> _checkAuthenticationSetup() async {
         debugPrint('❌ FIREBASE AUTHENTICATION ERROR: ${e.message}');
         debugPrint('');
         debugPrint('👉 HOW TO FIX:');
-        debugPrint('1. Go to the Firebase Console: https://console.firebase.google.com/');
+        debugPrint(
+            '1. Go to the Firebase Console: https://console.firebase.google.com/');
         debugPrint('2. Select your project: "aceit-bd1c9"');
         debugPrint('3. Go to Authentication > Sign-in method');
         debugPrint('4. Enable the "Email/Password" sign-in method');
@@ -188,13 +193,14 @@ void _loadHardcodedCredentials() {
     if (!dotenv.isInitialized) {
       dotenv.testLoad();
     }
-    
+
     // Set the environment variables
     dotenv.env['FIREBASE_API_KEY'] = FirebaseCredentials.apiKey;
     dotenv.env['FIREBASE_AUTH_DOMAIN'] = FirebaseCredentials.authDomain;
     dotenv.env['FIREBASE_PROJECT_ID'] = FirebaseCredentials.projectId;
     dotenv.env['FIREBASE_STORAGE_BUCKET'] = FirebaseCredentials.storageBucket;
-    dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] = FirebaseCredentials.messagingSenderId;
+    dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] =
+        FirebaseCredentials.messagingSenderId;
     dotenv.env['FIREBASE_APP_ID'] = FirebaseCredentials.appId;
     dotenv.env['FIREBASE_MEASUREMENT_ID'] = FirebaseCredentials.measurementId;
     debugPrint('Firebase credentials loaded into dotenv successfully');
@@ -207,8 +213,11 @@ void _loadHardcodedCredentials() {
 class MyApp extends StatelessWidget {
   final bool firebaseInitialized;
   final bool forceOnboarding;
-  
-  const MyApp({super.key, this.firebaseInitialized = false, this.forceOnboarding = false});
+
+  const MyApp(
+      {super.key,
+      this.firebaseInitialized = false,
+      this.forceOnboarding = false});
 
   @override
   Widget build(BuildContext context) {
@@ -216,6 +225,8 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => QuizProvider()),
+        ChangeNotifierProvider(create: (_) => FlashcardProvider()),
       ],
       child: MaterialApp(
         navigatorKey: navigatorKey,
@@ -225,16 +236,20 @@ class MyApp extends StatelessWidget {
         darkTheme: AppTheme.darkTheme(),
         themeMode: ThemeMode.system,
         // Show error screen if startup failed
-        home: appStartupFailed 
-            ? const ErrorApp() 
-            : (forceOnboarding ? const OnboardingScreen() : const TestScreen()),
+        home: appStartupFailed
+            ? const ErrorApp()
+            : (forceOnboarding ? const OnboardingScreen() : const AceItApp()),
         routes: {
+          AppConstants.welcomeRoute: (context) => const WelcomeScreen(),
           AppConstants.loginRoute: (context) => const LoginScreen(),
           AppConstants.registerRoute: (context) => const RegisterScreen(),
-          AppConstants.forgotPasswordRoute: (context) => const ForgotPasswordScreen(),
-          AppConstants.emailVerificationRoute: (context) => const EmailVerificationScreen(),
+          AppConstants.forgotPasswordRoute: (context) =>
+              const ForgotPasswordScreen(),
+          AppConstants.emailVerificationRoute: (context) =>
+              const EmailVerificationScreen(),
           AppConstants.dashboardRoute: (context) => const DashboardScreen(),
-          AppConstants.firebaseDiagnosticRoute: (context) => const FirebaseDiagnosticScreen(),
+          AppConstants.firebaseDiagnosticRoute: (context) =>
+              const FirebaseDiagnosticScreen(),
           AppConstants.onboardingRoute: (context) => const OnboardingScreen(),
           // This route will need parameters, so we don't use it directly in named routes
           // Instead we'll use MaterialPageRoute in the register screen

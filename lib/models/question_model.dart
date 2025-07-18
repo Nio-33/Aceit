@@ -8,7 +8,7 @@ class QuestionModel {
   final String examType;
   final String? imageUrl;
   final int difficultyLevel; // 1: Easy, 2: Medium, 3: Hard
-  
+
   QuestionModel({
     required this.id,
     required this.text,
@@ -20,14 +20,14 @@ class QuestionModel {
     this.imageUrl,
     this.difficultyLevel = 2,
   });
-  
+
   // From JSON constructor
   factory QuestionModel.fromJson(Map<String, dynamic> json) {
     return QuestionModel(
       id: json['id'] as String,
       text: json['text'] as String,
-      options: (json['options'] is Iterable) 
-          ? List<String>.from(json['options'] as Iterable) 
+      options: (json['options'] is Iterable)
+          ? List<String>.from(json['options'] as Iterable)
           : <String>[],
       correctAnswerIndex: json['correctAnswerIndex'] as int,
       explanation: json['explanation'] as String?,
@@ -37,7 +37,7 @@ class QuestionModel {
       difficultyLevel: json['difficultyLevel'] as int? ?? 2,
     );
   }
-  
+
   // To JSON method
   Map<String, dynamic> toJson() {
     return {
@@ -52,7 +52,7 @@ class QuestionModel {
       'difficultyLevel': difficultyLevel,
     };
   }
-  
+
   // Copy with method for updates
   QuestionModel copyWith({
     String? id,
@@ -77,4 +77,4 @@ class QuestionModel {
       difficultyLevel: difficultyLevel ?? this.difficultyLevel,
     );
   }
-} 
+}

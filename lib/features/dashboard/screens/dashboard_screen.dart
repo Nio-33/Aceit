@@ -9,6 +9,7 @@ import '../../mock_exams/screens/mock_exam_list_screen.dart';
 import '../../quizzes/screens/daily_quiz_screen.dart';
 import '../../flashcards/screens/flashcard_list_screen.dart';
 import '../../leaderboard/screens/leaderboard_screen.dart';
+import '../../admin/screens/admin_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -19,7 +20,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
-  
+
   final List<Widget> _screens = [
     const _DashboardHomeScreen(),
     const MockExamListScreen(),
@@ -27,7 +28,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     const FlashcardListScreen(),
     const LeaderboardScreen(),
   ];
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,14 +82,25 @@ class _DashboardHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final user = authProvider.user;
-    
+
     // Add debug print to see user state
     print('DashboardScreen: Current user data: ${user?.toJson()}');
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AdminScreen(),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.person_outline),
             onPressed: () {
@@ -120,7 +132,7 @@ class _DashboardHomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
+
                   Text(
                     'Let\'s continue your preparation for ${user.department} subjects.',
                     style: TextStyle(
@@ -129,14 +141,14 @@ class _DashboardHomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Streak Card
                   StreakCard(
                     currentStreak: user.currentStreak,
                     lastLoginDate: user.lastLoginDate,
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Section: Quick Actions
                   const Text(
                     'Quick Actions',
@@ -146,7 +158,7 @@ class _DashboardHomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Dashboard Cards - Quick Actions
                   GridView.count(
                     crossAxisCount: 2,
@@ -210,7 +222,7 @@ class _DashboardHomeScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Section: Your Subjects
                   const Text(
                     'Your Subjects',
@@ -220,7 +232,7 @@ class _DashboardHomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Subjects List
                   ...user.selectedSubjects.map((subject) {
                     return Card(
@@ -235,22 +247,11 @@ class _DashboardHomeScreen extends StatelessWidget {
                       ),
                     );
                   }).toList(),
-                  
+
                   const SizedBox(height: 16),
-                  
-                  // Sign Out Button (for testing)
-                  ElevatedButton(
-                    onPressed: () {
-                      authProvider.signOut();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                    ),
-                    child: const Text('Sign Out'),
-                  ),
                 ],
               ),
             ),
     );
   }
-} 
+}

@@ -10,7 +10,7 @@ class MockExamModel {
   final List<String> questionIds;
   final int passMarkPercentage;
   final DateTime createdAt;
-  
+
   MockExamModel({
     required this.id,
     required this.title,
@@ -22,7 +22,7 @@ class MockExamModel {
     this.passMarkPercentage = 50,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
-  
+
   // From JSON constructor
   factory MockExamModel.fromJson(Map<String, dynamic> json) {
     return MockExamModel(
@@ -32,16 +32,16 @@ class MockExamModel {
       examType: json['examType'] as String,
       durationInMinutes: json['durationInMinutes'] as int,
       numberOfQuestions: json['numberOfQuestions'] as int,
-      questionIds: (json['questionIds'] is Iterable) 
-          ? List<String>.from(json['questionIds'] as Iterable) 
+      questionIds: (json['questionIds'] is Iterable)
+          ? List<String>.from(json['questionIds'] as Iterable)
           : <String>[],
       passMarkPercentage: json['passMarkPercentage'] as int? ?? 50,
-      createdAt: json['createdAt'] != null 
-          ? (json['createdAt'] as Timestamp).toDate() 
+      createdAt: json['createdAt'] != null
+          ? (json['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
     );
   }
-  
+
   // To JSON method
   Map<String, dynamic> toJson() {
     return {
@@ -56,7 +56,7 @@ class MockExamModel {
       'createdAt': createdAt,
     };
   }
-  
+
   // Copy with method for updates
   MockExamModel copyWith({
     String? id,
@@ -81,4 +81,4 @@ class MockExamModel {
       createdAt: createdAt ?? this.createdAt,
     );
   }
-} 
+}

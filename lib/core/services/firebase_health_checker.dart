@@ -10,20 +10,21 @@ import '../../env_example.dart';
 /// Service to diagnose and fix Firebase configuration issues
 class FirebaseHealthChecker {
   /// Singleton instance
-  static final FirebaseHealthChecker _instance = FirebaseHealthChecker._internal();
-  
+  static final FirebaseHealthChecker _instance =
+      FirebaseHealthChecker._internal();
+
   /// Factory constructor
   factory FirebaseHealthChecker() => _instance;
-  
+
   /// Private constructor
   FirebaseHealthChecker._internal();
-  
+
   /// Firebase Auth instance
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  
+
   /// Firebase Firestore instance
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  
+
   /// Check Firebase Authentication health
   Future<Map<String, dynamic>> checkAuthHealth() async {
     final Map<String, dynamic> result = {
@@ -32,17 +33,18 @@ class FirebaseHealthChecker {
       'details': <String, dynamic>{},
       'needsConfiguration': false,
     };
-    
+
     try {
       debugPrint('FirebaseHealthChecker: Testing Authentication...');
-      
-      // Test with a dummy email to check if Auth is configured
-      await _auth.fetchSignInMethodsForEmail('test@example.com');
-      
+
+      // Test with dummy credentials to check if Auth is configured
+      await _auth.signInWithEmailAndPassword(
+          email: 'test@example.com', password: 'dummy_password');
+
       result['success'] = true;
       result['message'] = 'Firebase Authentication is correctly configured';
       (result['details'] as Map<String, dynamic>)['auth_status'] = 'configured';
-      
+
       debugPrint('FirebaseHealthChecker: Auth test successful');
       return result;
     } catch (e) {
@@ -52,18 +54,22 @@ class FirebaseHealthChecker {
           // These errors actually mean Auth is working!
           result['success'] = true;
           result['message'] = 'Firebase Authentication is correctly configured';
-          (result['details'] as Map<String, dynamic>)['auth_status'] = 'configured';
+          (result['details'] as Map<String, dynamic>)['auth_status'] =
+              'configured';
           (result['details'] as Map<String, dynamic>)['error_code'] = e.code;
-          
-          debugPrint('FirebaseHealthChecker: Auth test successful (user-not-found is expected)');
+
+          debugPrint(
+              'FirebaseHealthChecker: Auth test successful (user-not-found is expected)');
         } else if (e.message?.contains('CONFIGURATION_NOT_FOUND') == true) {
           // Auth is not configured in Firebase Console
           result['success'] = false;
           result['message'] = 'Firebase Authentication is not configured';
-          (result['details'] as Map<String, dynamic>)['auth_status'] = 'not_configured';
-          (result['details'] as Map<String, dynamic>)['error_code'] = 'CONFIGURATION_NOT_FOUND';
+          (result['details'] as Map<String, dynamic>)['auth_status'] =
+              'not_configured';
+          (result['details'] as Map<String, dynamic>)['error_code'] =
+              'CONFIGURATION_NOT_FOUND';
           result['needsConfiguration'] = true;
-          
+
           debugPrint('FirebaseHealthChecker: Auth is not configured');
         } else {
           // Other Firebase Auth exceptions
@@ -71,9 +77,11 @@ class FirebaseHealthChecker {
           result['message'] = 'Firebase Authentication error: ${e.message}';
           (result['details'] as Map<String, dynamic>)['auth_status'] = 'error';
           (result['details'] as Map<String, dynamic>)['error_code'] = e.code;
-          (result['details'] as Map<String, dynamic>)['error_message'] = e.message;
-          
-          debugPrint('FirebaseHealthChecker: Auth error: ${e.code} - ${e.message}');
+          (result['details'] as Map<String, dynamic>)['error_message'] =
+              e.message;
+
+          debugPrint(
+              'FirebaseHealthChecker: Auth error: ${e.code} - ${e.message}');
         }
       } else {
         // Non-Firebase Auth exceptions
@@ -81,14 +89,14 @@ class FirebaseHealthChecker {
         result['message'] = 'Error checking Authentication: $e';
         (result['details'] as Map<String, dynamic>)['auth_status'] = 'error';
         (result['details'] as Map<String, dynamic>)['error'] = e.toString();
-        
+
         debugPrint('FirebaseHealthChecker: Unexpected error checking Auth: $e');
       }
-      
+
       return result;
     }
   }
-  
+
   /// Check Firestore health
   Future<Map<String, dynamic>> checkFirestoreHealth() async {
     final Map<String, dynamic> result = {
@@ -96,17 +104,18 @@ class FirebaseHealthChecker {
       'message': '',
       'details': <String, dynamic>{},
     };
-    
+
     try {
       debugPrint('FirebaseHealthChecker: Testing Firestore...');
-      
+
       // Try reading from a test collection
       await _firestore.collection('_test_').limit(1).get();
-      
+
       result['success'] = true;
       result['message'] = 'Firestore is correctly configured';
-      (result['details'] as Map<String, dynamic>)['firestore_status'] = 'configured';
-      
+      (result['details'] as Map<String, dynamic>)['firestore_status'] =
+          'configured';
+
       debugPrint('FirebaseHealthChecker: Firestore test successful');
       return result;
     } catch (e) {
@@ -115,12 +124,12 @@ class FirebaseHealthChecker {
       result['message'] = 'Firestore error: $e';
       (result['details'] as Map<String, dynamic>)['firestore_status'] = 'error';
       (result['details'] as Map<String, dynamic>)['error'] = e.toString();
-      
+
       debugPrint('FirebaseHealthChecker: Firestore error: $e');
       return result;
     }
   }
-  
+
   /// Check overall Firebase health
   Future<Map<String, dynamic>> checkFirebaseHealth() async {
     final Map<String, dynamic> result = {
@@ -131,7 +140,7 @@ class FirebaseHealthChecker {
       'needs_configuration': false,
       'fix_instructions': '',
     };
-    
+
     // Check if Firebase is initialized
     try {
       Firebase.app();
@@ -151,43 +160,45 @@ class FirebaseHealthChecker {
           'error': e.toString(),
         },
       };
-      
+
       // If core is not initialized, we can't check other services
       result['success'] = false;
       result['needs_configuration'] = true;
       result['fix_instructions'] = _getFirebaseCoreFixInstructions();
       return result;
     }
-    
+
     // Check Auth health
     final authHealth = await checkAuthHealth();
     result['auth'] = authHealth;
-    
+
     // Check Firestore health
     final firestoreHealth = await checkFirestoreHealth();
     result['firestore'] = firestoreHealth;
-    
+
     // Determine overall health
-    result['success'] = authHealth['success'] == true && firestoreHealth['success'] == true;
-    
+    result['success'] =
+        authHealth['success'] == true && firestoreHealth['success'] == true;
+
     // Check if configuration is needed
     if (authHealth['needsConfiguration'] == true) {
       result['needs_configuration'] = true;
       result['fix_instructions'] = _getAuthFixInstructions();
     }
-    
+
     return result;
   }
-  
+
   /// Launch Firebase Console for configuration
   Future<bool> launchFirebaseConsole() async {
-    final url = 'https://console.firebase.google.com/project/${FirebaseCredentials.projectId}/authentication/providers';
+    final url =
+        'https://console.firebase.google.com/project/${FirebaseCredentials.projectId}/authentication/providers';
     if (await canLaunchUrl(Uri.parse(url))) {
       return await launchUrl(Uri.parse(url));
     }
     return false;
   }
-  
+
   /// Get instructions to fix Firebase Core
   String _getFirebaseCoreFixInstructions() {
     return '''
@@ -214,7 +225,7 @@ class FirebaseHealthChecker {
    ```
 ''';
   }
-  
+
   /// Get instructions to fix Authentication
   String _getAuthFixInstructions() {
     return '''
@@ -236,7 +247,7 @@ class FirebaseHealthChecker {
 - Verify that the API key (${FirebaseCredentials.apiKey}) hasn't been restricted
 ''';
   }
-  
+
   /// Show a detailed Firebase health check dialog
   void showHealthCheckDialog(BuildContext context) async {
     // Show loading dialog first
@@ -262,15 +273,15 @@ class FirebaseHealthChecker {
         );
       },
     );
-    
+
     // Perform health check
     final result = await checkFirebaseHealth();
-    
+
     // Close loading dialog
     if (context.mounted) {
       Navigator.of(context).pop();
     }
-    
+
     // Show results dialog
     if (context.mounted) {
       showDialog<void>(
@@ -278,9 +289,9 @@ class FirebaseHealthChecker {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text(
-              result['success'] == true 
-                ? 'Firebase is Configured Correctly' 
-                : 'Firebase Configuration Issues',
+              result['success'] == true
+                  ? 'Firebase is Configured Correctly'
+                  : 'Firebase Configuration Issues',
               style: TextStyle(
                 color: result['success'] == true ? Colors.green : Colors.red,
               ),
@@ -292,27 +303,27 @@ class FirebaseHealthChecker {
                 children: [
                   // Firebase Core status
                   _buildStatusItem(
-                    'Firebase Core', 
+                    'Firebase Core',
                     result['firebase_core']['success'] == true,
                     result['firebase_core']['message']?.toString() ?? '',
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // Authentication status
                   _buildStatusItem(
-                    'Authentication', 
+                    'Authentication',
                     result['auth']['success'] == true,
                     result['auth']['message']?.toString() ?? '',
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // Firestore status
                   _buildStatusItem(
-                    'Firestore', 
+                    'Firestore',
                     result['firestore']['success'] == true,
                     result['firestore']['message']?.toString() ?? '',
                   ),
-                  
+
                   // Fix instructions if needed
                   if (result['needs_configuration'] == true) ...[
                     const SizedBox(height: 16),
@@ -339,7 +350,7 @@ class FirebaseHealthChecker {
                 },
                 child: const Text('Close'),
               ),
-              if (result['needs_configuration'] == true) 
+              if (result['needs_configuration'] == true)
                 ElevatedButton(
                   onPressed: () {
                     launchFirebaseConsole();
@@ -352,7 +363,7 @@ class FirebaseHealthChecker {
       );
     }
   }
-  
+
   /// Build a status item widget
   Widget _buildStatusItem(String title, bool success, String message) {
     return Row(
@@ -382,4 +393,4 @@ class FirebaseHealthChecker {
       ],
     );
   }
-} 
+}

@@ -7,7 +7,7 @@ class FlashcardModel {
   final String subject;
   final String? imageUrl;
   final DateTime createdAt;
-  
+
   FlashcardModel({
     required this.id,
     required this.front,
@@ -16,7 +16,7 @@ class FlashcardModel {
     this.imageUrl,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
-  
+
   // From JSON constructor
   factory FlashcardModel.fromJson(Map<String, dynamic> json) {
     return FlashcardModel(
@@ -25,12 +25,12 @@ class FlashcardModel {
       back: json['back'] as String,
       subject: json['subject'] as String,
       imageUrl: json['imageUrl'] as String?,
-      createdAt: json['createdAt'] != null 
-          ? (json['createdAt'] as Timestamp).toDate() 
+      createdAt: json['createdAt'] != null
+          ? (json['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
     );
   }
-  
+
   // To JSON method
   Map<String, dynamic> toJson() {
     return {
@@ -42,7 +42,7 @@ class FlashcardModel {
       'createdAt': createdAt,
     };
   }
-  
+
   // Copy with method for updates
   FlashcardModel copyWith({
     String? id,
@@ -61,4 +61,4 @@ class FlashcardModel {
       createdAt: createdAt ?? this.createdAt,
     );
   }
-} 
+}
