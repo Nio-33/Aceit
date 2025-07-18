@@ -13,12 +13,23 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final user = authProvider.user;
+    final isLoading = authProvider.isLoading;
+    final status = authProvider.status;
+
+    // Don't show loading if user is logged out
+    if (status == AuthStatus.unauthenticated) {
+      return const Scaffold(
+        body: Center(
+          child: Text('Redirecting to login...'),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Profile'),
       ),
-      body: user == null
+      body: user == null || isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.all(16),

@@ -98,7 +98,7 @@ class ErrorHandler {
     String source, {
     Function(String)? onError,
   }) {
-    return (error) {
+    return (dynamic error) {
       final stackTrace = StackTrace.current;
       logError(source, error, stackTrace);
 

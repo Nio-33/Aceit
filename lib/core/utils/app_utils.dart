@@ -27,7 +27,7 @@ class AppUtils {
 
   // Show a loading dialog
   static void showLoadingDialog(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) => const AlertDialog(

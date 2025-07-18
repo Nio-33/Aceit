@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../features/auth/providers/auth_provider.dart';
-import '../features/quiz/providers/quiz_provider.dart';
 import '../features/auth/screens/welcome_screen.dart';
-import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/email_verification_screen.dart';
 import '../features/onboarding/screens/onboarding_screen.dart';
 import '../features/dashboard/screens/dashboard_screen.dart';

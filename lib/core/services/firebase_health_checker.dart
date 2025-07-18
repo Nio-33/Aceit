@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../env_example.dart';
+import 'package:aceit/env_example.dart';
 
 /// Service to diagnose and fix Firebase configuration issues
 class FirebaseHealthChecker {
